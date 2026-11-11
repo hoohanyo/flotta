@@ -1,5 +1,5 @@
 // Flottakezelő – offline gyorsítótár. Új kiadásnál a VERZIO-t emeld.
-var VERZIO = 'flotta-0.3';
+var VERZIO = 'flotta-0.4';
 var FAJLOK = ['./', './index.html', './config.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
@@ -17,7 +17,8 @@ self.addEventListener('activate', function (e) {
 self.addEventListener('fetch', function (e) {
   var req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
-  e.respondWith(fetch(req).then(function (res) {
+  // no-cache: a böngésző mindig rákérdez a szerverre, így frissítés után nem a régi fájlt adja
+  e.respondWith(fetch(req, { cache: 'no-cache' }).then(function (res) {
     var masolat = res.clone();
     caches.open(VERZIO).then(function (c) { c.put(req, masolat); });
     return res;
