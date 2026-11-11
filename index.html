@@ -180,7 +180,7 @@ nav.menu a .jelveny{top:-6px;right:10px}
 (function () {
 'use strict';
 
-var VERZIO = '0.1';
+var VERZIO = '0.3';
 var API = (window.FLOTTA_API || '').trim();
 var LS = { kod: 'fk_kod', ceg: 'fk_ceg', adat: 'fk_adat' };
 
@@ -616,17 +616,172 @@ function nezetTobb() {
     h += '<div class="kartya infok">A naptárba írás most ki van kapcsolva. A Sheet <b>Beállítások</b> lapján a „Naptár szinkron” sort kell <b>Igen</b>-re állítani.</div>';
   }
   h += '<div class="szakasz"><h2>Adatok</h2></div><div class="kartya infok">Utolsó frissítés: <b>' + esc(String(A.ido || '').replace('T', ' ')) + '</b><br>Járművek: ' + jarmuvek().length + ' · Sofőrök: ' + soforok().length + ' · Okmányok: ' + okmanyok().length +
-    '<br><br><button type="button" class="gomb masod" data-act="frissit">Frissítés most</button>' +
+    '<br><br><button type="button" class="gomb" data-act="excel-teljes">Teljes táblázat letöltése (Excel)</button>' +
+    '<div style="font-size:12px;color:var(--muted);margin:8px 0 14px">A központi Sheet minden lapja egy Excel-fájlban, ahogy most áll.</div>' +
+    '<button type="button" class="gomb masod" data-act="excel">Rendezett lista (visszaimportálható)</button>' +
+    '<div style="font-size:12px;color:var(--muted);margin:8px 0 14px">Járművek és sofőrök a lejáratokkal, soronként. Gépen szerkesztve, majd a Sheetbe visszaimportálva a Flotta → Excel szinkronizálása átveszi a változásokat.</div>' +
+    '<button type="button" class="gomb masod" data-act="frissit">Frissítés most</button>' +
     '<button type="button" class="gomb torol" data-act="kilep">Kilépés ezen a készüléken</button></div>';
   h += '<div class="ures" style="font-size:12px">Flottakezelő ' + VERZIO + '</div>';
   return h;
 }
 
+/* ───── Excel (xlsx) letöltés – saját, függőség nélküli író ─────
+ * Lapok: „Excel járművek”, „Excel sofőrök” (ugyanaz a szerkezet, amit a Sheet Excel-betöltője felismer,
+ * így visszaimportálva összefésülhető), „Egyéb lejáratok” (csak tájékoztató).
+ */
+var CRC_T = (function () { var t = [], c, n, k; for (n = 0; n < 256; n++) { c = n; for (k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(b) { var c = 0xFFFFFFFF; for (var i = 0; i < b.length; i++) c = CRC_T[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function zipStore(fajlok) { // [{nev, tartalom(string)}] → Uint8Array, tömörítés nélkül
+  var enc = new TextEncoder(), reszek = [], kozp = [], hely = 0;
+  function u16(v) { return [v & 255, (v >>> 8) & 255]; }
+  function u32(v) { return [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255]; }
+  fajlok.forEach(function (f) {
+    var nev = enc.encode(f.nev), adat = enc.encode(f.tartalom), crc = crc32(adat);
+    var fej = [].concat([0x50, 0x4b, 3, 4], u16(20), u16(0x0800), u16(0), u16(0), u16(0x21), u32(crc), u32(adat.length), u32(adat.length), u16(nev.length), u16(0));
+    reszek.push(new Uint8Array(fej), nev, adat);
+    kozp.push(new Uint8Array([].concat([0x50, 0x4b, 1, 2], u16(20), u16(20), u16(0x0800), u16(0), u16(0), u16(0x21), u32(crc), u32(adat.length), u32(adat.length), u16(nev.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(hely))), nev);
+    hely += fej.length + nev.length + adat.length;
+  });
+  var kozpHossz = kozp.reduce(function (s, x) { return s + x.length; }, 0);
+  var veg = new Uint8Array([].concat([0x50, 0x4b, 5, 6], u16(0), u16(0), u16(fajlok.length), u16(fajlok.length), u32(kozpHossz), u32(hely), u16(0)));
+  var mind = reszek.concat(kozp, [veg]), hossz = mind.reduce(function (s, x) { return s + x.length; }, 0);
+  var ki = new Uint8Array(hossz), p = 0;
+  mind.forEach(function (x) { ki.set(x, p); p += x.length; });
+  return ki;
+}
+function xmlEsc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, ''); }
+function oszlopBetu(i) { var s = ''; i++; while (i > 0) { var m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; }
+// cella: string | number | {d:'YYYY-MM-DD'} dátum | {k:szám} ezres tagolással | ''
+function lapXml(sorok, szelessegek) {
+  var x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+    '<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>' +
+    szelessegek.map(function (w, i) { return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>'; }).join('') + '</cols><sheetData>';
+  sorok.forEach(function (sor, r) {
+    x += '<row r="' + (r + 1) + '">';
+    sor.forEach(function (v, c) {
+      var ref = oszlopBetu(c) + (r + 1);
+      if (v === '' || v === null || v === undefined) return;
+      if (r === 0) x += '<c r="' + ref + '" s="1" t="inlineStr"><is><t>' + xmlEsc(v) + '</t></is></c>';
+      else if (v && v.d) {
+        var d = isoDate(v.d);
+        if (d) x += '<c r="' + ref + '" s="2"><v>' + Math.round((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(1899, 11, 30)) / 86400000) + '</v></c>';
+      } else if (v && typeof v.k === 'number') x += '<c r="' + ref + '" s="3"><v>' + v.k + '</v></c>';
+      else if (typeof v === 'number') x += '<c r="' + ref + '"><v>' + v + '</v></c>';
+      else x += '<c r="' + ref + '" t="inlineStr"><is><t xml:space="preserve">' + xmlEsc(v) + '</t></is></c>';
+    });
+    x += '</row>';
+  });
+  var utolsoOszlop = oszlopBetu(Math.max(1, sorok[0].length) - 1);
+  return x + '</sheetData><autoFilter ref="A1:' + utolsoOszlop + Math.max(1, sorok.length) + '"/></worksheet>';
+}
+function xlsxKeszit(lapok) { // [{nev, sorok, szelessegek}]
+  var f = [];
+  f.push({ nev: '[Content_Types].xml', tartalom: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+    lapok.map(function (l, i) { return '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'; }).join('') + '</Types>' });
+  f.push({ nev: '_rels/.rels', tartalom: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>' });
+  f.push({ nev: 'xl/workbook.xml', tartalom: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' +
+    lapok.map(function (l, i) { return '<sheet name="' + xmlEsc(l.nev) + '" sheetId="' + (i + 1) + '" r:id="rId' + (i + 1) + '"/>'; }).join('') + '</sheets><definedNames>' +
+    lapok.map(function (l, i) { return '<definedName name="_xlnm._FilterDatabase" localSheetId="' + i + '" hidden="1">\'' + xmlEsc(l.nev) + '\'!$A$1:$' + oszlopBetu(Math.max(1, l.sorok[0].length) - 1) + '$' + Math.max(1, l.sorok.length) + '</definedName>'; }).join('') + '</definedNames></workbook>' });
+  f.push({ nev: 'xl/_rels/workbook.xml.rels', tartalom: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    lapok.map(function (l, i) { return '<Relationship Id="rId' + (i + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>'; }).join('') +
+    '<Relationship Id="rId' + (lapok.length + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>' });
+  f.push({ nev: 'xl/styles.xml', tartalom: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+    '<numFmts count="2"><numFmt numFmtId="164" formatCode="yyyy\\.mm\\.dd"/><numFmt numFmtId="165" formatCode="#,##0"/></numFmts>' +
+    '<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts>' +
+    '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1F6F68"/><bgColor indexed="64"/></patternFill></fill></fills>' +
+    '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+    '<cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/>' +
+    '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs>' +
+    '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>' });
+  lapok.forEach(function (l, i) { f.push({ nev: 'xl/worksheets/sheet' + (i + 1) + '.xml', tartalom: lapXml(l.sorok, l.szelessegek) }); });
+  return zipStore(f);
+}
+
+// a flotta adataiból a három lap
+function excelLapok() {
+  function lap(kihez, alap, adatSorok) {
+    var tipusLista = tipusok(kihez).filter(function (t) { return t.tipus !== 'Egyéb'; });
+    var fej = alap.map(function (a) { return a[0]; }).concat(tipusLista.map(function (t) { return t.tipus; }));
+    var sorok = [fej];
+    adatSorok.forEach(function (x) {
+      var okm = okmTulajnal(kihez, x.id);
+      sorok.push(alap.map(function (a) { return a[1](x); }).concat(tipusLista.map(function (t) {
+        var o = okm.filter(function (y) { return y.tipus === t.tipus; })[0];
+        if (!o) return '';
+        var v = Number(t.ism) ? o.utolso : o.lejarat;
+        return v ? { d: v } : '';
+      })));
+    });
+    var szel = alap.map(function (a) { return a[2]; }).concat(tipusLista.map(function (t) { return Math.max(13, Math.min(26, t.tipus.length + 3)); }));
+    return { sorok: sorok, szelessegek: szel };
+  }
+  function szam(v) { return v === '' || v === undefined || v === null || isNaN(Number(v)) ? (v || '') : Number(v); }
+  var jl = lap('Jármű', [
+    ['Rendszám', function (j) { return j.rendszam; }, 13], ['Típus', function (j) { return j.tipus || ''; }, 26],
+    ['Évjárat', function (j) { return szam(j.evjarat); }, 9], ['Ülőhely', function (j) { return j.ules || ''; }, 10],
+    ['Alvázszám', function (j) { return j.alvaz || ''; }, 20], ['Km-állás', function (j) { var n = szam(j.km); return typeof n === 'number' ? { k: n } : n; }, 12],
+    ['Állapot', function (j) { return j.allapot || ''; }, 13], ['Megjegyzés', function (j) { return j.megj || ''; }, 30]
+  ], jarmuvek().slice().sort(function (a, b) { return String(a.rendszam).localeCompare(String(b.rendszam), 'hu'); }));
+  var sl = lap('Sofőr', [
+    ['Név', function (s) { return s.nev; }, 24], ['Telefon', function (s) { return s.tel || ''; }, 16],
+    ['Állapot', function (s) { return s.allapot || ''; }, 10], ['Megjegyzés', function (s) { return s.megj || ''; }, 30]
+  ], soforok().slice().sort(function (a, b) { return String(a.nev).localeCompare(String(b.nev), 'hu'); }));
+  var egyeb = [['Kihez', 'Rendszám / név', 'Megnevezés', 'Lejárat', 'Állapot']];
+  rendezettOkm(okmanyok().filter(function (o) { return o.tipus === 'Egyéb' || !tipusInfo(o.kihez, o.tipus); })).forEach(function (x) {
+    egyeb.push([x.o.kihez, tulajNev(x.o), x.o.megj || x.o.tipus, x.o.lejarat ? { d: x.o.lejarat } : '', x.a.rel]);
+  });
+  return [
+    { nev: 'Excel járművek', sorok: jl.sorok, szelessegek: jl.szelessegek },
+    { nev: 'Excel sofőrök', sorok: sl.sorok, szelessegek: sl.szelessegek },
+    { nev: 'Egyéb lejáratok', sorok: egyeb, szelessegek: [9, 22, 28, 12, 18] }
+  ];
+}
+function excelLetolt() {
+  var bajt = xlsxKeszit(excelLapok());
+  var blob = new Blob([bajt], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  var nev = 'Flotta_' + isoMa() + '.xlsx';
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = nev;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  toast('Letöltve: ' + nev);
+}
+function blobLetolt(blob, nev) {
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = nev;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+}
+// a teljes központi Sheet, a szerver exportálja
+function teljesExcelLetolt(gomb) {
+  var szoveg = gomb.innerHTML;
+  gomb.disabled = true; gomb.innerHTML = '<span class="porog"></span>Excel készül…';
+  function vissza() { gomb.disabled = false; gomb.innerHTML = szoveg; }
+  apiGet({ a: 'excel', kod: S.kod }).then(function (res) {
+    vissza();
+    if (!res || !res.ok) {
+      if (res && (res.hiba === 'kod' || res.hiba === 'zarolva')) return kilep(hibaSzoveg(res) + ' Lépj be újra.');
+      return toast(hibaSzoveg(res), true);
+    }
+    var bin = atob(res.b64), b = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) b[i] = bin.charCodeAt(i);
+    blobLetolt(new Blob([b], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), res.nev);
+    toast('Letöltve: ' + res.nev);
+  }, function () { vissza(); toast(hibaSzoveg(null), true); });
+}
+window.__fkExcel = function () { return xlsxKeszit(excelLapok()); }; // tesztekhez
+
 /* ───── lapok (űrlapok) ───── */
 function lapNyit(html) {
   document.getElementById('lap-hely').innerHTML = '<div class="hatter" data-act="hatter"><div class="lap" role="dialog" aria-modal="true"><div class="fogo"></div>' + html + '</div></div>';
   var f = document.querySelector('.lap input:not([type=hidden]),.lap select');
-  if (f && !('ontouchstart' in window)) setTimeout(function () { f.focus(); }, 60);
+  if (f && !('ontouchstart' in window)) setTimeout(function () {
+    var lap = document.querySelector('.lap');
+    if (lap && !lap.contains(document.activeElement)) f.focus(); // ha közben már máshová kattintott, nem ugrik vissza
+  }, 60);
 }
 function lapZar() { document.getElementById('lap-hely').innerHTML = ''; }
 function lapFej(cim) {
@@ -811,6 +966,8 @@ document.addEventListener('click', function (e) {
   if (act === 'szuro') { S.jarmuSzuro = el.dataset.v; return rajzol(); }
   if (act === 'szeg') { S.emlekSzeg = el.dataset.v; return rajzol(); }
   if (act === 'frissit') return frissit(false);
+  if (act === 'excel') return excelLetolt();
+  if (act === 'excel-teljes') return teljesExcelLetolt(el);
   if (act === 'kilep') { if (!torlesMegerosit(el, 'Biztosan kilépsz? Koppints újra')) return; return kilep(''); }
   if (act === 'masol') {
     var v = el.dataset.v;
