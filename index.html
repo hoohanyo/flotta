@@ -273,6 +273,11 @@ nav.menu a .jelveny{top:-6px;right:10px}
 .javaslat{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
 .javaslat button{height:32px;padding:0 11px;border-radius:999px;background:var(--card2);border:1px solid var(--line3);color:var(--soft);font-size:13px;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .javaslat button:active{background:var(--accBg);color:var(--accText)}
+.rszoszlop{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0}
+.rszoszlop.kozep{align-items:center}
+.alvaz{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11.5px;letter-spacing:.5px;color:var(--muted);-webkit-user-select:all;user-select:all;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.alvaz em{font-style:normal;font-family:Inter,sans-serif;letter-spacing:0;margin-right:5px;opacity:.85}
+.hero .alvaz{color:rgba(255,255,255,.78);margin-top:8px;display:block;position:relative;z-index:1}
 .temavalaszto{display:inline-flex;gap:4px;padding:4px;border-radius:14px;background:var(--card2);border:1px solid var(--line);flex-shrink:0}
 .temavalaszto button{width:44px;height:38px;border-radius:10px;border:0;background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center}
 .temavalaszto button.be{background:var(--accBg);color:var(--accText)}
@@ -298,7 +303,7 @@ nav.menu a .jelveny{top:-6px;right:10px}
 (function () {
 'use strict';
 
-var VERZIO = '0.8.1';
+var VERZIO = '0.8.2';
 var API = (window.FLOTTA_API || '').trim();
 var LS = { kod: 'fk_kod', ceg: 'fk_ceg', adat: 'fk_adat', szerep: 'fk_szerep', sid: 'fk_sid', pin: 'fk_pin', busz: 'fk_busz', rkod: 'fk_rkod' };
 
@@ -751,7 +756,7 @@ function nezetSoforFo() {
     '<button type="button" class="hgomb" data-act="s-frissit" aria-label="Frissítés">' + IK.frissit + '</button></div></div>';
   if (!js.length) return h + '<!--OFF--></div><div class="kartya ures" style="margin-top:16px">Még nincs busz a rendszerben. Szólj az irodának.</div>' + soforLab();
   h += '<div class="mezo"><label for="s-busz">Melyik busszal vagy?</label><select id="s-busz" data-change="s-busz" style="height:56px;font-size:18px;font-weight:600">' +
-    js.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === S.busz ? ' selected' : '') + '>' + esc(x.rendszam + (x.tipus ? ' · ' + x.tipus : '')) + '</option>'; }).join('') + '</select></div><!--OFF--></div>';
+    js.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === S.busz ? ' selected' : '') + '>' + esc(x.rendszam + (x.tipus ? ' · ' + x.tipus : '')) + '</option>'; }).join('') + '</select>' + alvazHtml(j.alvaz) + '</div><!--OFF--></div>';
   function g(act, ik, szin, cim, extra, al) {
     return '<button type="button" class="muv" style="padding:20px 8px;font-size:15px" data-act="' + act + '" data-jarmu="' + esc(j.id) + '" data-id="' + esc(j.id) + '"' + (extra || '') + '><span class="ik ' + szin + '" style="width:52px;height:52px">' + ik + '</span>' + cim + (al || '') + '</button>';
   }
@@ -909,6 +914,10 @@ function nezetJarmuvek() {
   h += '<div id="jlista">' + jarmuKartyak(lathato) + '</div>';
   return h;
 }
+function alvazHtml(v) { return v ? '<span class="alvaz" title="Alvázszám"><em>Alváz</em>' + esc(v) + '</span>' : ''; }
+function rszAlvaz(j, nagy, kozep) {
+  return j.alvaz ? '<span class="rszoszlop' + (kozep ? ' kozep' : '') + '">' + rszHtml(j.rendszam, nagy) + alvazHtml(j.alvaz) + '</span>' : rszHtml(j.rendszam, nagy);
+}
 function jarmuKartyak(lathato) {
   if (!lathato.length) return '<div class="kartya ures">Nincs találat.</div>';
   return lathato.map(function (j) {
@@ -932,7 +941,7 @@ function jarmuKartyak(lathato) {
       (tetelek.length ? tetelek.slice(0, 3).map(function (x) { return '<span class="jelzo"><i class="' + x.k + '"></i>' + esc(x.szoveg) + '</span>'; }).join('')
         : '<span class="jelzo"><i class="none"></i>Még nincs rögzített lejárat</span>');
     return '<a class="jkartya ' + (k === 'ok' ? '' : k) + '" href="#/jarmu/' + encodeURIComponent(j.id) + '">' +
-      '<span class="jk1">' + rszHtml(j.rendszam) + statuszPill(j.allapot) + '</span>' +
+      '<span class="jk1" style="align-items:flex-start">' + rszAlvaz(j) + statuszPill(j.allapot) + '</span>' +
       '<span class="jk2"><b>' + esc(j.tipus || 'Típus nincs megadva') + '</b><span>' + esc(meta) + '</span></span>' +
       '<span class="jelzok">' + jel + '</span></a>';
   }).join('');
@@ -966,8 +975,8 @@ function nezetJarmu(id) {
   var es = aktivEsedek(id).map(function (y) { return { y: y, a: esedekAll(y.e, j) }; }).sort(function (a, b) { return a.a.rend - b.a.rend; });
   var gond = okm.filter(function (o) { return allapot(o).k !== 'ok'; }).length + es.filter(function (x) { return x.a.k === 'bad' || x.a.k === 'warn'; }).length;
   var ny = nyitottHibak(id);
-  var meta = [j.evjarat, j.ules ? j.ules + ' hely' : '', j.alvaz ? 'alváz: ' + j.alvaz : ''].filter(String).join(' · ');
-  var h = '<div class="felso"><a class="ikongomb" href="#/jarmuvek" aria-label="Vissza a járművekhez">' + IK.vissza + '</a>' + rszHtml(j.rendszam, true) +
+  var meta = [j.evjarat, j.ules ? j.ules + ' hely' : ''].filter(String).join(' · ');
+  var h = '<div class="felso"><a class="ikongomb" href="#/jarmuvek" aria-label="Vissza a járművekhez">' + IK.vissza + '</a>' + rszAlvaz(j, true, true) +
     '<button type="button" class="ikongomb" data-act="jarmu-szerk" data-id="' + esc(id) + '" aria-label="Jármű adatainak szerkesztése">' + IK.ceruza + '</button></div>';
   h += '<div class="kartya hos"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><div class="c">' + esc(j.tipus || 'Típus nincs megadva') + '</div><div class="m">' + esc(meta || '–') + '</div></div>' + statuszPill(j.allapot) + '</div>' +
     '<div class="racs3">' +
