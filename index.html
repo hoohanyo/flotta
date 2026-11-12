@@ -336,7 +336,7 @@ nav.menu a .jelveny{top:-6px;right:10px}
 (function () {
 'use strict';
 
-var VERZIO = '0.9.2';
+var VERZIO = '0.9.3';
 var API = (window.FLOTTA_API || '').trim();
 var LS = { kod: 'fk_kod', ceg: 'fk_ceg', adat: 'fk_adat', szerep: 'fk_szerep', sid: 'fk_sid', pin: 'fk_pin', busz: 'fk_busz', rkod: 'fk_rkod' };
 
@@ -1217,7 +1217,7 @@ function fulEll(j) {
   if (!l.length) return h + '<div class="kartya ures">Még nincs ellenőrzés. A sofőrök a saját felületükön, indulás előtt pipálják végig a listát.</div>';
   return h + '<div class="kartya lista">' + vagott(l, 'el', id).map(function (x) {
     var hl = hianyLista(x), k = hl.length ? 'warn' : 'ok';
-    var al = [x.sofor || x.rogzitette, x.km !== '' && x.km !== undefined ? km(x.km) + ' km' : '', x.megj].filter(String).join(' · ');
+    var al = [j.rendszam, x.sofor || x.rogzitette, x.km !== '' && x.km !== undefined ? km(x.km) + ' km' : '', x.megj].filter(String).join(' · ');
     return '<button type="button" class="sor" data-act="ell-szerk" data-id="' + esc(x.id) + '">' + datBlokk(x.datum, k) +
       '<span class="t"><b>' + esc(hl.length ? hl.join(', ') : 'Minden rendben') + '</b><span>' + esc(evElotag(x.datum) + al) + '</span></span><span class="pill ' + k + '">' + (hl.length ? hl.length + ' hiány' : 'rendben') + '</span></button>';
   }).join('') + tovabbGomb(l, 'el', id) + '</div>';
