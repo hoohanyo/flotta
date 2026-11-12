@@ -216,7 +216,7 @@ nav.menu a .jelveny{top:-6px;right:10px}
 (function () {
 'use strict';
 
-var VERZIO = '0.7.2';
+var VERZIO = '0.7.3';
 var API = (window.FLOTTA_API || '').trim();
 var LS = { kod: 'fk_kod', ceg: 'fk_ceg', adat: 'fk_adat', szerep: 'fk_szerep', sid: 'fk_sid', pin: 'fk_pin', busz: 'fk_busz', rkod: 'fk_rkod' };
 
@@ -691,9 +691,11 @@ function soforLab() {
   tetelek.sort(function (a, b) { return String(b.x.rogzitve || b.x.datum).localeCompare(String(a.x.rogzitve || a.x.datum)); });
   var h = '<div class="szakasz"><h2>Legutóbbi rögzítéseim</h2><span>javítani csak aznap lehet</span></div>';
   h += tetelek.length ? '<div class="kartya lista">' + tetelek.slice(0, 12).map(function (e) {
-    var mai = String(e.x.rogzitve || '').slice(0, 10) === ma;
-    return '<button type="button" class="sor" data-act="s-sajat" data-t="' + e.t + '" data-id="' + esc(e.x.id) + '" data-mai="' + (mai ? '1' : '') + '">' + datBlokk(e.x.datum) +
-      '<span class="t"><b>' + esc(e.cim) + '</b><span>' + esc(e.al.filter(String).join(' · ')) + '</span></span>' + (mai ? '<span class="pill info">javítható</span>' : '') + '</button>';
+    var zar = sajatLezarva(e.t, e.x);
+    var pill = zar ? '<span class="pill ' + zar.k + '">' + esc(zar.szoveg) + '</span>'
+      : String(e.x.rogzitve || '').slice(0, 10) === ma ? '<span class="pill info">javítható</span>' : '';
+    return '<button type="button" class="sor" data-act="s-sajat" data-t="' + e.t + '" data-id="' + esc(e.x.id) + '">' + datBlokk(e.x.datum) +
+      '<span class="t"><b>' + esc(e.cim) + '</b><span>' + esc(e.al.filter(String).join(' · ')) + '</span></span>' + pill + '</button>';
   }).join('') + '</div>' : '<div class="kartya ures">Még nem rögzítettél semmit.</div>';
   h += '<div class="ures" style="font-size:13px">Belépve: <b style="color:var(--text)">' + esc(en.nev || '') + '</b> · Flottakezelő ' + VERZIO + '</div>' +
     '<button type="button" class="gomb torol" data-act="kilep">Kilépés ezen a telefonon</button>';
@@ -1542,16 +1544,23 @@ function mezoJ(nev, cimke, ertek, extra, lista) {
       return '<button type="button" data-act="javaslat" data-cel="' + id + '" data-v="' + esc(v) + '">' + esc(v) + '</button>';
     }).join('') + '</div>' : '') + '</div>';
 }
-// sofőr: a saját bejegyzését aznap javíthatja, máskor csak megnézheti
+// az iroda már lezárta / foglalkozik vele → a sofőr nem módosíthatja
+function sajatLezarva(t, x) {
+  if (t === 'hiba' && x.allapot === 'Javítva') return { k: 'ok', szoveg: 'javítva', info: 'Ezt a hibát az iroda már javítottnak jelölte' + (x.javitva ? ' (' + fmtD(x.javitva) + ')' : '') + ', nem módosítható.' };
+  if (t === 'kar' && x.allapot && x.allapot !== 'Bejelentve') return { k: x.allapot === 'Lezárva' ? 'ok' : 'warn', szoveg: String(x.allapot).toLowerCase(), info: 'Ezzel a kárüggyel az iroda már foglalkozik (' + String(x.allapot).toLowerCase() + '), nem módosítható.' };
+  return null;
+}
+// sofőr: a saját bejegyzését aznap javíthatja (amíg az iroda le nem zárta), máskor csak megnézheti
 function soforSajatNyit(t, x) {
-  var mai = String(x.rogzitve || '').slice(0, 10) === isoMa() && (t !== 'hiba' || x.bejelento === (S.A.en || {}).nev);
+  var zar = sajatLezarva(t, x);
+  var mai = !zar && String(x.rogzitve || '').slice(0, 10) === isoMa() && (t !== 'hiba' || x.bejelento === (S.A.en || {}).nev);
   ({ tank: tankLap, hiba: hibaLap, kar: karLap })[t](x);
   if (!mai) {
     var f = document.querySelector('.lap form');
     Array.prototype.forEach.call(f.querySelectorAll('input,select,textarea,button'), function (el) { el.disabled = true; });
     Array.prototype.forEach.call(f.querySelectorAll('button[type=submit],.javaslat'), function (el) { el.remove(); });
     var info = document.createElement('div'); info.className = 'info';
-    info.textContent = 'Ezt már nem javíthatod (csak a rögzítés napján). Ha hibás, szólj az irodának.';
+    info.textContent = zar ? zar.info : 'Ezt már nem javíthatod (csak a rögzítés napján). Ha hibás, szólj az irodának.';
     f.insertBefore(info, f.firstChild);
   }
 }
