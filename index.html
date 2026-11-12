@@ -216,13 +216,19 @@ nav.menu a .jelveny{top:-6px;right:10px}
 (function () {
 'use strict';
 
-var VERZIO = '0.5.2';
+var VERZIO = '0.7';
 var API = (window.FLOTTA_API || '').trim();
-var LS = { kod: 'fk_kod', ceg: 'fk_ceg', adat: 'fk_adat' };
+var LS = { kod: 'fk_kod', ceg: 'fk_ceg', adat: 'fk_adat', szerep: 'fk_szerep', sid: 'fk_sid', pin: 'fk_pin', busz: 'fk_busz', rkod: 'fk_rkod' };
 
 /* ───── állapot ───── */
 var S = {
   kod: lsGet(LS.kod) || '',
+  szerep: lsGet(LS.szerep) || 'iroda',   // iroda | sofor
+  sid: lsGet(LS.sid) || '',
+  pin: lsGet(LS.pin) || '',
+  busz: lsGet(LS.busz) || '',
+  belepMod: lsGet(LS.szerep) === 'sofor' ? 'sofor' : 'iroda',
+  belepLepes: 'rkod', rkod: lsGet(LS.rkod) || '', soforLista: null, valasztott: null,
   ceg: lsGet(LS.ceg) || '',
   A: null,            // adatok a szerverről
   offline: false,
@@ -233,6 +239,9 @@ var S = {
 };
 try { S.A = JSON.parse(lsGet(LS.adat) || 'null'); } catch (e) { S.A = null; }
 
+function sofor_e() { return S.szerep === 'sofor'; }
+function belepve() { return sofor_e() ? !!(S.sid && S.pin) : !!S.kod; }
+function hitel() { return sofor_e() ? { sofor: S.sid, pin: S.pin } : { kod: S.kod }; }
 function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 function lsSet(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
 
@@ -257,6 +266,7 @@ var IK = {
   kut: '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h12M4 10h10"/><path d="M14 8h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V8l-3-3"/></svg>',
   csavar: '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>',
   pajzs: '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 7v5c0 5 3.8 8.5 9 9 5.2-.5 9-4 9-9V7z"/><path d="M12 8v5M12 16h.01"/></svg>',
+  frissit: '<svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/></svg>',
   gumi: '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M12 3v5.5M12 15.5V21M3 12h5.5M15.5 12H21"/></svg>',
   felho: '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l20 20M5.8 5.8A7 7 0 0 0 6 19h11a5 5 0 0 0 2.3-.6M9.5 4.6A7 7 0 0 1 18 9a5 5 0 0 1 3.8 6.6"/></svg>'
 };
@@ -469,9 +479,14 @@ function apiGet(params) {
     .then(function (r) { return r.json(); });
 }
 function apiPost(body) {
-  body.kod = S.kod;
+  var h = hitel();
+  Object.keys(h).forEach(function (k) { body[k] = h[k]; });
   return idokorlat(fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow' }))
     .then(function (r) { return r.json(); });
+}
+// hitelesítés nélküli POST (PIN beállítása)
+function apiPost0(body) {
+  return idokorlat(fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow' })).then(function (r) { return r.json(); });
 }
 function idokorlat(p) {
   return new Promise(function (ok, nem) {
@@ -484,6 +499,11 @@ function hibaSzoveg(res) {
   if (res.hiba === 'kod') return 'Hibás cégkód.';
   if (res.hiba === 'zarolva') return 'Túl sok hibás próbálkozás. Várj 10 percet.';
   if (res.hiba === 'adat') return res.uzenet || 'Hibás adat.';
+  if (res.hiba === 'jog') return res.uzenet || 'Ehhez nincs jogosultságod.';
+  if (res.hiba === 'pin') return 'Hibás PIN-kód.';
+  if (res.hiba === 'rkod') return 'Hibás regisztrációs kód.';
+  if (res.hiba === 'inaktiv') return 'A belépésed le van tiltva. Kérdezd az irodát.';
+  if (res.hiba === 'nincspin') return 'Nincs beállított PIN-kódod (az iroda törölhette). Lépj be újra a regisztrációs kóddal.';
   return 'Szerverhiba: ' + (res.uzenet || res.hiba || 'ismeretlen');
 }
 function adatBe(a) {
@@ -493,12 +513,12 @@ function adatBe(a) {
   lsSet(LS.adat, JSON.stringify(a));
 }
 function frissit(csendes) {
-  if (!S.kod || !API) return Promise.resolve();
+  if (!belepve() || !API) return Promise.resolve();
   S.tolt = true;
-  return apiGet({ a: 'adatok', kod: S.kod }).then(function (res) {
+  return apiGet(Object.assign({ a: 'adatok' }, hitel())).then(function (res) {
     S.tolt = false;
     if (res && res.ok) { adatBe(res.adatok); rajzol(); if (!csendes) toast('Frissítve'); }
-    else if (res && (res.hiba === 'kod' || res.hiba === 'zarolva')) kilep(hibaSzoveg(res) + ' Lépj be újra.');
+    else if (res && ['kod', 'zarolva', 'pin', 'inaktiv', 'nincspin'].indexOf(res.hiba) >= 0) kilep(hibaSzoveg(res) + (res.hiba === 'zarolva' ? '' : ' Lépj be újra.'));
     else { S.offline = true; rajzol(); if (!csendes) toast(hibaSzoveg(res), true); }
   }, function () {
     S.tolt = false; S.offline = true; rajzol();
@@ -506,8 +526,8 @@ function frissit(csendes) {
   });
 }
 function kilep(uzenet) {
-  S.kod = ''; S.A = null;
-  lsSet(LS.kod, null); lsSet(LS.adat, null);
+  S.kod = ''; S.A = null; S.sid = ''; S.pin = ''; S.belepLepes = 'rkod'; S.soforLista = null; S.valasztott = null;
+  lsSet(LS.kod, null); lsSet(LS.adat, null); lsSet(LS.sid, null); lsSet(LS.pin, null);
   location.hash = '#/';
   rajzol(uzenet);
 }
@@ -537,7 +557,13 @@ function rajzol(belepUzenet) {
     app.innerHTML = '<div class="belepes"><h1>Flottakezelő</h1><p>Hiányzik a szerver címe. A <b>config.js</b> fájlba kell beírni az Apps Script webalkalmazás …/exec linkjét.</p></div>';
     return;
   }
-  if (!S.kod) { menuHely.innerHTML = ''; app.innerHTML = nezetBelepes(belepUzenet); return; }
+  if (!belepve()) { menuHely.innerHTML = ''; app.innerHTML = nezetBelepes(belepUzenet); return; }
+  if (sofor_e()) {
+    menuHely.innerHTML = '';
+    app.innerHTML = (S.offline ? '<div class="offline">' + IK.felho + 'Nincs kapcsolat – a legutóbb letöltött adatokat látod.</div>' : '') +
+      (S.A && S.A.szerep === 'sofor' ? nezetSoforFo() : '<div class="ures" style="padding-top:120px">Adatok betöltése…</div>');
+    return;
+  }
   var u = utvonal();
   var html;
   if (!S.A) html = '<div class="ures" style="padding-top:120px">Adatok betöltése…</div>';
@@ -570,12 +596,106 @@ function menuHtml(akt) {
 
 /* ───── nézetek ───── */
 function nezetBelepes(uz) {
-  return '<form class="belepes" data-form="belep" autocomplete="off">' +
-    '<div class="logo">' + IK.busz.replace(/22/g, '38') + '</div>' +
-    '<div><h1>Flottakezelő</h1><p style="margin-top:6px">' + (S.ceg ? esc(S.ceg) + ' · ' : '') + 'Írd be a cégkódot, amit a munkahelyedtől kaptál. A telefon megjegyzi, legközelebb nem kell újra.</p></div>' +
-    '<div class="mezo"><label for="kod">Cégkód</label><input id="kod" name="kod" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="pl. FLOTTA-1234" required></div>' +
-    '<div class="hibauz" id="belep-hiba">' + esc(uz || '') + '</div>' +
-    '<button class="gomb" type="submit">Belépés</button></form>';
+  var mod = S.belepMod;
+  var h = '<div class="belepes"><div class="logo">' + IK.busz.replace(/22/g, '38') + '</div>' +
+    '<div><h1>Flottakezelő</h1><p style="margin-top:6px">' + (S.ceg ? esc(S.ceg) : 'Járművek, lejáratok, szerviz, tankolás') + '</p></div>' +
+    '<div class="szegmens" role="group" aria-label="Belépés módja" style="grid-template-columns:repeat(2,minmax(0,1fr));margin:0">' +
+    '<button type="button" class="' + (mod === 'sofor' ? 'be' : '') + '" aria-pressed="' + (mod === 'sofor') + '" data-act="belep-mod" data-v="sofor">Sofőr</button>' +
+    '<button type="button" class="' + (mod === 'iroda' ? 'be' : '') + '" aria-pressed="' + (mod === 'iroda') + '" data-act="belep-mod" data-v="iroda">Iroda</button></div>';
+  if (mod === 'iroda') {
+    h += '<form data-form="belep" autocomplete="off" style="display:flex;flex-direction:column;gap:16px"><p>Írd be a cégkódot. A telefon megjegyzi, legközelebb nem kell újra.</p>' +
+      '<div class="mezo"><label for="kod">Cégkód</label><input id="kod" name="kod" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="pl. FLOTTA-1234" required></div>' +
+      '<div class="hibauz" id="belep-hiba">' + esc(uz || '') + '</div><button class="gomb" type="submit">Belépés</button></form>';
+    return h + '</div>';
+  }
+  // sofőr: 1) regisztrációs kód  2) név  3) PIN (beírás vagy első beállítás)
+  if (S.belepLepes === 'rkod' || !S.soforLista) {
+    h += '<form data-form="s-rkod" autocomplete="off" style="display:flex;flex-direction:column;gap:16px"><p>Írd be a regisztrációs kódot, amit az irodától kaptál.</p>' +
+      '<div class="mezo"><label for="rkod">Regisztrációs kód</label><input id="rkod" name="rkod" value="' + esc(S.rkod) + '" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="pl. SOFOR-1234" required></div>' +
+      '<div class="hibauz" id="belep-hiba">' + esc(uz || '') + '</div><button class="gomb" type="submit">Tovább</button></form>';
+  } else if (S.belepLepes === 'nev') {
+    h += '<div style="display:flex;flex-direction:column;gap:10px"><p>Ki vagy?</p>' + (S.soforLista.length ? S.soforLista.map(function (x) {
+      return '<button type="button" class="pipasor" style="align-items:center;margin:0;color:var(--text);font-size:16px;font-weight:600;text-align:left" data-act="s-nev" data-id="' + esc(x.id) + '"><span class="avatar" style="width:36px;height:36px;font-size:13px">' + esc(monogram(x.nev)) + '</span><span style="flex-grow:1">' + esc(x.nev) +
+        '<small>' + (x.vanPin ? 'PIN-kód beállítva' : 'első belépés – PIN-t választasz') + '</small></span>' + IK.jobbra + '</button>';
+    }).join('') : '<div class="kartya ures">Nincs aktív sofőr a listában. Szólj az irodának.</div>') +
+      '<div class="hibauz" id="belep-hiba">' + esc(uz || '') + '</div><button type="button" class="gomb masod" data-act="s-vissza">Vissza</button></div>';
+  } else {
+    var v = S.valasztott || {};
+    var uj = !v.vanPin;
+    h += '<form data-form="s-pin" autocomplete="off" style="display:flex;flex-direction:column;gap:16px">' +
+      '<p><b style="color:var(--text)">' + esc(v.nev) + '</b><br>' + (uj ? 'Válassz egy 4–6 jegyű PIN-kódot. Ezzel lépsz be, csak te tudod.' : 'Írd be a PIN-kódodat.') + '</p>' +
+      '<div class="mezo"><label for="pin">' + (uj ? 'Új PIN-kód' : 'PIN-kód') + '</label><input id="pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" required style="letter-spacing:6px;font-size:22px"></div>' +
+      (uj ? '<div class="mezo"><label for="pin2">PIN-kód még egyszer</label><input id="pin2" name="pin2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" required style="letter-spacing:6px;font-size:22px"></div>' : '') +
+      '<div class="hibauz" id="belep-hiba">' + esc(uz || '') + '</div><button class="gomb" type="submit">' + (uj ? 'PIN beállítása és belépés' : 'Belépés') + '</button>' +
+      '<button type="button" class="gomb masod" data-act="s-vissza">Másik név</button></form>';
+  }
+  return h + '</div>';
+}
+
+// ── sofőr főképernyő ──
+function nezetSoforFo() {
+  var A = S.A, en = A.en || {}, ma = ma0();
+  var js = jarmuvek();
+  if (!jarmu(S.busz) && js.length) { S.busz = js[0].id; lsSet(LS.busz, S.busz); }
+  var j = jarmu(S.busz);
+  var h = '<div class="fej"><div><div class="kicsi">' + esc(A.ceg || 'Flotta') + '</div><h1>Szia, ' + esc(String(en.nev || '').split(' ').slice(-1)[0] || en.nev) + '!</h1>' +
+    '<div class="al">' + ma.getFullYear() + '. ' + HONAP[ma.getMonth()] + ' ' + ma.getDate() + '., ' + NAP[ma.getDay()] + '</div></div>' +
+    '<button type="button" class="ikongomb" data-act="s-frissit" aria-label="Frissítés">' + IK.frissit + '</button></div>';
+  if (!js.length) return h + '<div class="kartya ures">Még nincs busz a rendszerben. Szólj az irodának.</div>' + soforLab();
+  h += '<div class="mezo"><label for="s-busz">Melyik busszal vagy?</label><select id="s-busz" data-change="s-busz" style="height:56px;font-size:18px;font-weight:600">' +
+    js.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === S.busz ? ' selected' : '') + '>' + esc(x.rendszam + (x.tipus ? ' · ' + x.tipus : '')) + '</option>'; }).join('') + '</select></div>';
+  function g(act, ik, szin, cim, extra) {
+    return '<button type="button" class="muv" style="padding:20px 8px;font-size:15px" data-act="' + act + '" data-jarmu="' + esc(j.id) + '" data-id="' + esc(j.id) + '"' + (extra || '') + '><span class="ik" style="width:52px;height:52px;' + szin + '">' + ik + '</span>' + cim + '</button>';
+  }
+  h += '<div class="racs2" style="margin-bottom:6px">' +
+    g('tank-uj', IK.kut, 'background:rgba(69,194,181,.16);color:#6FD6CB', 'Tankolás') +
+    g('hiba-uj', IK.harom, 'background:rgba(242,179,61,.16);color:#F5C25E', 'Hiba bejelentése') +
+    g('km', IK.ora, 'background:rgba(79,191,133,.16);color:#6FD49F', 'Km-állás') +
+    g('kar-uj', IK.pajzs, 'background:rgba(255,122,110,.14);color:#FF9A90', 'Kár / baleset') + '</div>';
+
+  // a busz állapota
+  var okm = rendezettOkm(okmTulajnal('Jármű', j.id));
+  var es = aktivEsedek(j.id).map(function (y) { return { y: y, a: esedekAll(y.e, j) }; }).sort(function (x, y) { return x.a.rend - y.a.rend; });
+  var ny = nyitottHibak(j.id);
+  h += '<div class="szakasz"><h2>' + esc(j.rendszam) + ' állapota</h2><span>' + (j.km !== '' && j.km !== undefined ? km(j.km) + ' km' : '') + '</span></div>';
+  var sorok = okm.map(function (x) {
+    return '<div class="sor"><span class="pont ' + x.a.k + '"></span><span class="t"><b>' + esc(x.o.tipus === 'Egyéb' && x.o.megj ? x.o.megj : x.o.tipus) + '</b><span>' + esc(x.a.ism ? 'határidő ' + fmtD(x.o.lejarat) : fmtD(x.o.lejarat)) + '</span></span><span class="pill ' + (x.a.k === 'none' ? 'muted' : x.a.k) + '">' + esc(x.a.rel) + '</span></div>';
+  }).concat(es.map(function (x) {
+    return '<div class="sor"><span class="pont ' + x.a.k + '"></span><span class="t"><b>' + esc(x.y.e.tetel) + ' (szerviz)</b><span>' + esc([x.y.e.km !== '' ? km(x.y.e.km) + ' km' : '', x.y.e.datum ? fmtD(x.y.e.datum) : ''].filter(String).join(' / ')) + '</span></span><span class="pill ' + (x.a.k === 'none' ? 'muted' : x.a.k) + '">' + esc(x.a.rel) + '</span></div>';
+  }));
+  h += sorok.length ? '<div class="kartya lista">' + sorok.join('') + '</div>' : '<div class="kartya ures">Nincs rögzített lejárat ennél a busznál.</div>';
+  h += '<div class="szakasz"><h2>Nyitott hibák</h2><span>' + ny.length + ' db</span></div>';
+  h += ny.length ? '<div class="kartya lista">' + ny.map(function (x) {
+    var k = hibaK(x), sajat = x.bejelento === en.nev;
+    return '<' + (sajat ? 'button type="button" data-act="s-hiba" data-id="' + esc(x.id) + '"' : 'div') + ' class="sor"><span class="pont ' + k + '"></span><span class="t"><b>' + esc(x.leiras) + '</b><span>' + esc([fmtD(x.datum), x.bejelento].filter(String).join(' · ')) + '</span></span><span class="pill ' + (k === 'none' ? 'muted' : k) + '">' + esc((x.sulyossag || 'Normál').toLowerCase()) + '</span></' + (sajat ? 'button' : 'div') + '>';
+  }).join('') + '</div>' : '<div class="kartya ures">Nincs bejelentett hiba ennél a busznál.</div>';
+
+  // saját okmányok
+  var sajOkm = rendezettOkm(okmanyok().filter(function (o) { return o.kihez === 'Sofőr'; }));
+  if (sajOkm.length) {
+    h += '<div class="szakasz"><h2>Saját okmányaim</h2></div><div class="kartya lista">' + sajOkm.map(function (x) {
+      return '<div class="sor"><span class="pont ' + x.a.k + '"></span><span class="t"><b>' + esc(x.o.tipus) + '</b><span>' + esc(fmtD(x.o.lejarat)) + '</span></span><span class="pill ' + (x.a.k === 'none' ? 'muted' : x.a.k) + '">' + esc(x.a.rel) + '</span></div>';
+    }).join('') + '</div>';
+  }
+  return h + soforLab();
+}
+function soforLab() {
+  var en = (S.A && S.A.en) || {};
+  var ma = isoMa();
+  var tetelek = [];
+  tankolasok().forEach(function (x) { tetelek.push({ t: 'tank', x: x, cim: szamF(x.liter, 2) + ' l tankolás', al: [jarmu(x.jarmu) ? jarmu(x.jarmu).rendszam : '', x.hely, km(x.km) + ' km'] }); });
+  hibak().filter(function (x) { return x.bejelento === en.nev; }).forEach(function (x) { tetelek.push({ t: 'hiba', x: x, cim: 'Hiba: ' + x.leiras, al: [jarmu(x.jarmu) ? jarmu(x.jarmu).rendszam : '', x.allapot === 'Javítva' ? 'javítva' : 'nyitott'] }); });
+  karok().forEach(function (x) { tetelek.push({ t: 'kar', x: x, cim: 'Kár: ' + x.leiras, al: [jarmu(x.jarmu) ? jarmu(x.jarmu).rendszam : '', String(x.allapot || '').toLowerCase()] }); });
+  tetelek.sort(function (a, b) { return String(b.x.rogzitve || b.x.datum).localeCompare(String(a.x.rogzitve || a.x.datum)); });
+  var h = '<div class="szakasz"><h2>Legutóbbi rögzítéseim</h2><span>javítani csak aznap lehet</span></div>';
+  h += tetelek.length ? '<div class="kartya lista">' + tetelek.slice(0, 12).map(function (e) {
+    var mai = String(e.x.rogzitve || '').slice(0, 10) === ma;
+    return '<button type="button" class="sor" data-act="s-sajat" data-t="' + e.t + '" data-id="' + esc(e.x.id) + '" data-mai="' + (mai ? '1' : '') + '">' + datBlokk(e.x.datum) +
+      '<span class="t"><b>' + esc(e.cim) + '</b><span>' + esc(e.al.filter(String).join(' · ')) + '</span></span>' + (mai ? '<span class="pill info">javítható</span>' : '') + '</button>';
+  }).join('') + '</div>' : '<div class="kartya ures">Még nem rögzítettél semmit.</div>';
+  h += '<div class="ures" style="font-size:13px">Belépve: <b style="color:var(--text)">' + esc(en.nev || '') + '</b> · Flottakezelő ' + VERZIO + '</div>' +
+    '<button type="button" class="gomb torol" data-act="kilep">Kilépés ezen a telefonon</button>';
+  return h;
 }
 
 function nezetAttekintes() {
@@ -885,7 +1005,8 @@ function nezetSofor(id) {
   var h = '<div class="felso"><a class="ikongomb" href="#/soforok" aria-label="Vissza a sofőrökhöz">' + IK.vissza + '</a>' +
     '<button type="button" class="ikongomb" data-act="sofor-szerk" data-id="' + esc(id) + '" aria-label="Sofőr adatainak szerkesztése">' + IK.ceruza + '</button></div>';
   h += '<div class="kartya hos"><div style="display:flex;align-items:center;gap:12px"><span class="avatar" style="width:52px;height:52px;border-radius:26px;font-size:18px">' + esc(monogram(s.nev)) + '</span><div style="flex-grow:1"><div class="c">' + esc(s.nev) + '</div><div class="m">' +
-    (s.tel ? '<a href="tel:' + esc(String(s.tel).replace(/[^0-9+]/g, '')) + '">' + esc(s.tel) + '</a>' : 'nincs telefonszám') + '</div></div>' + statuszPill(s.allapot) + '</div></div>';
+    (s.tel ? '<a href="tel:' + esc(String(s.tel).replace(/[^0-9+]/g, '')) + '">' + esc(s.tel) + '</a>' : 'nincs telefonszám') + '</div></div>' + statuszPill(s.allapot) + '</div>' +
+    '<div class="m">' + (s.vanPin ? 'Belépés: PIN beállítva ' + esc(fmtD(String(s.pinDatum || '').slice(0, 10))) + (s.belepes ? ' · utoljára ' + esc(String(s.belepes).replace(/-/g, '.')) : '') : 'Még nem lépett be (nincs PIN-kódja).') + '</div></div>';
   h += '<div class="szakasz"><h2>Okmányok és letöltések</h2><span>koppints a megújításhoz</span></div>' + csempek('Sofőr', id);
   if (s.megj) h += '<div class="kartya megj">' + esc(s.megj) + '</div>';
   return h;
@@ -933,6 +1054,8 @@ function nezetTobb() {
   } else {
     h += '<div class="kartya infok">A naptárba írás most ki van kapcsolva. A Sheet <b>Beállítások</b> lapján a „Naptár szinkron” sort kell <b>Igen</b>-re állítani.</div>';
   }
+  h += '<div class="szakasz"><h2>Sofőrök belépése</h2></div><div class="kartya infok">A sofőrök ugyanezen az oldalon, a <b>Sofőr</b> fülön lépnek be. Első alkalommal ezt a regisztrációs kódot kérik, utána saját PIN-kódot választanak:' +
+    '<code class="kod" style="font-size:16px;text-align:center">' + esc(A.soforRkod || '–') + '</code>A kódot a Sheet Beállítások lapján lehet megváltoztatni (a már belépett sofőröket nem érinti).</div>';
   h += '<div class="szakasz"><h2>Adatok</h2></div><div class="kartya infok">Utolsó frissítés: <b>' + esc(String(A.ido || '').replace('T', ' ')) + '</b><br>Járművek: ' + jarmuvek().length + ' · Sofőrök: ' + soforok().length + ' · Okmányok: ' + okmanyok().length +
     '<br><br><button type="button" class="gomb" data-act="excel-teljes">Teljes táblázat letöltése (Excel)</button>' +
     '<div style="font-size:12px;color:var(--muted);margin:8px 0 14px">A központi Sheet minden lapja egy Excel-fájlban, ahogy most áll.</div>' +
@@ -1078,7 +1201,7 @@ function teljesExcelLetolt(gomb) {
   var szoveg = gomb.innerHTML;
   gomb.disabled = true; gomb.innerHTML = '<span class="porog"></span>Excel készül…';
   function vissza() { gomb.disabled = false; gomb.innerHTML = szoveg; }
-  apiGet({ a: 'excel', kod: S.kod }).then(function (res) {
+  apiGet(Object.assign({ a: 'excel' }, hitel())).then(function (res) {
     vissza();
     if (!res || !res.ok) {
       if (res && (res.hiba === 'kod' || res.hiba === 'zarolva')) return kilep(hibaSzoveg(res) + ' Lépj be újra.');
@@ -1158,8 +1281,10 @@ function soforLap(id) {
     mezo('nev', 'Név *', s.nev, ' required autocapitalize="words"') +
     mezo('tel', 'Telefon', s.tel, ' type="tel" inputmode="tel"') +
     valaszto('allapot', 'Állapot', ['Aktív', 'Inaktív'], s.allapot || 'Aktív') +
+    '<div class="mezo" style="margin-top:-6px"><span class="tipp">Inaktív sofőr nem tud belépni.</span></div>' +
     '<div class="mezo"><label for="m-megj">Megjegyzés</label><textarea id="m-megj" name="megj">' + esc(s.megj || '') + '</textarea></div>' +
     '<button class="gomb" type="submit">Mentés</button>' +
+    (id && s.vanPin ? '<button class="gomb masod" type="button" data-act="pin-torol" data-id="' + esc(id) + '" style="margin-top:10px">PIN-kód törlése (újat választhat)</button>' : '') +
     (id ? '<button class="gomb torol" type="button" data-act="sofor-torol" data-id="' + esc(id) + '">Sofőr törlése</button>' : '') +
     '</form>');
 }
@@ -1292,12 +1417,13 @@ function hibaLap(o) {
     '<div class="mezo"><span class="lbl">Mennyire sürgős?</span><div class="szegmens" role="group" aria-label="Súlyosság" style="margin-bottom:0">' + ['Sürgős', 'Normál', 'Apró'].map(function (x) {
       return '<button type="button" class="' + (x === suly ? 'be' : '') + '" aria-pressed="' + (x === suly) + '" data-act="hiba-suly" data-v="' + x + '">' + x + '</button>';
     }).join('') + '</div></div>' +
-    '<div class="ket">' + mezoJ('bejelento', 'Bejelentő', uj ? (lsGet('fk_nev') || '') : o.bejelento, '', szemelyek()) + mezo('datum', 'Dátum', o.datum || isoMa(), ' type="date"') + '</div>' +
-    '<button class="gomb" type="submit">Mentés</button>' +
-    (uj ? '' : all === 'Javítva'
+    (sofor_e() ? mezo('datum', 'Dátum', o.datum || isoMa(), ' type="date"')
+      : '<div class="ket">' + mezoJ('bejelento', 'Bejelentő', uj ? (lsGet('fk_nev') || '') : o.bejelento, '', szemelyek()) + mezo('datum', 'Dátum', o.datum || isoMa(), ' type="date"') + '</div>') +
+    '<button class="gomb" type="submit">' + (uj && sofor_e() ? 'Bejelentés' : 'Mentés') + '</button>' +
+    (uj || sofor_e() ? '' : all === 'Javítva'
       ? '<button class="gomb masod" type="button" data-act="hiba-allapot" data-v="Nyitott" style="margin-top:10px">Újranyitom</button>'
       : '<button class="gomb masod" type="button" data-act="hiba-allapot" data-v="Javítva" style="margin-top:10px">' + IK.pipa + 'Javítottnak jelölöm</button>') +
-    (uj ? '' : '<button class="gomb torol" type="button" data-act="hiba-torol" data-id="' + esc(o.id) + '">Hiba törlése</button>') +
+    (uj || sofor_e() ? '' : '<button class="gomb torol" type="button" data-act="hiba-torol" data-id="' + esc(o.id) + '">Hiba törlése</button>') +
     '</form>');
 }
 
@@ -1328,12 +1454,12 @@ function tankLap(o) {
     '<div class="ket">' + mezo('egysegar', 'Egységár (Ft/l)', o.egysegar !== undefined ? String(o.egysegar).replace('.', ',') : '', ' inputmode="decimal"') +
     mezo('osszeg', 'Összeg (Ft)', ezres(o.osszeg), ' inputmode="numeric" data-ezres') + '</div>' +
     '<div class="mezo" style="margin-top:-6px"><span class="tipp">Elég az egyiket megadni, a másikat kiszámolja.</span></div>' +
-    mezoJ('hely', 'Helyszín', o.hely, ' placeholder="pl. MOL Győr"', gyakori(mezoErtekek(tankolasok(), 'hely'))) +
-    mezoJ('sofor', 'Sofőr', o.sofor, '', szemelyek()) +
+    mezoJ('hely', 'Helyszín', o.hely, ' placeholder="pl. MOL Győr"', gyakori(mezoErtekek(tankolasok(), 'hely').concat((S.A && S.A.javaslat && S.A.javaslat.hely) || []))) +
+    (sofor_e() ? '' : mezoJ('sofor', 'Sofőr', o.sofor, '', szemelyek())) +
     mezo('megj', 'Megjegyzés', o.megj) +
-    mezoJ('rogzitette', 'Rögzítette', uj ? (lsGet('fk_nev') || '') : o.rogzitette, '', szemelyek()) +
+    (sofor_e() ? '' : mezoJ('rogzitette', 'Rögzítette', uj ? (lsGet('fk_nev') || '') : o.rogzitette, '', szemelyek())) +
     '<button class="gomb" type="submit">Mentés</button>' +
-    (uj ? '' : '<button class="gomb torol" type="button" data-act="naplo-torol" data-tipus="tank" data-id="' + esc(o.id) + '">Tankolás törlése</button>') +
+    (uj || sofor_e() ? '' : '<button class="gomb torol" type="button" data-act="naplo-torol" data-tipus="tank" data-id="' + esc(o.id) + '">Tankolás törlése</button>') +
     '</form>');
 }
 
@@ -1344,17 +1470,17 @@ function karLap(o) {
     mezo('datum', 'Dátum *', o.datum || isoMa(), ' type="date" required') +
     mezoJ('hely', 'Helyszín', o.hely, '', gyakori(mezoErtekek(karok(), 'hely'))) +
     '<div class="mezo"><label for="m-leiras">Mi történt? *</label><textarea id="m-leiras" name="leiras" required placeholder="pl. tolatásnál oszlopnak ütközött, hátsó lökhárító">' + esc(o.leiras || '') + '</textarea></div>' +
-    mezoJ('sofor', 'Sofőr', o.sofor, '', szemelyek()) +
+    (sofor_e() ? '' : mezoJ('sofor', 'Sofőr', o.sofor, '', szemelyek())) +
     mezo('masik', 'Másik fél', o.masik, ' placeholder="név, rendszám"') +
     valGomb('rendorseg', 'Rendőrség kint volt?', [['Nem'], ['Igen']], o.rendorseg || 'Nem') +
     mezoJ('biztosito', 'Biztosító', o.biztosito, '', gyakori(mezoErtekek(karok(), 'biztosito'))) +
     mezo('karszam', 'Kárszám', o.karszam) +
     mezo('osszeg', 'Becsült kár (Ft)', ezres(o.osszeg), ' inputmode="numeric" data-ezres') +
-    valGomb('allapot', 'Állapot', [['Bejelentve'], ['Folyamatban'], ['Lezárva']], o.allapot || 'Bejelentve') +
+    (sofor_e() ? '' : valGomb('allapot', 'Állapot', [['Bejelentve'], ['Folyamatban'], ['Lezárva']], o.allapot || 'Bejelentve')) +
     mezo('megj', 'Megjegyzés', o.megj) +
-    mezoJ('rogzitette', 'Rögzítette', uj ? (lsGet('fk_nev') || '') : o.rogzitette, '', szemelyek()) +
-    '<button class="gomb" type="submit">Mentés</button>' +
-    (uj ? '' : '<button class="gomb torol" type="button" data-act="naplo-torol" data-tipus="kar" data-id="' + esc(o.id) + '">Kárügy törlése</button>') +
+    (sofor_e() ? '' : mezoJ('rogzitette', 'Rögzítette', uj ? (lsGet('fk_nev') || '') : o.rogzitette, '', szemelyek())) +
+    '<button class="gomb" type="submit">' + (uj && sofor_e() ? 'Bejelentés' : 'Mentés') + '</button>' +
+    (uj || sofor_e() ? '' : '<button class="gomb torol" type="button" data-act="naplo-torol" data-tipus="kar" data-id="' + esc(o.id) + '">Kárügy törlése</button>') +
     '</form>');
 }
 
@@ -1413,6 +1539,19 @@ function mezoJ(nev, cimke, ertek, extra, lista) {
       return '<button type="button" data-act="javaslat" data-cel="' + id + '" data-v="' + esc(v) + '">' + esc(v) + '</button>';
     }).join('') + '</div>' : '') + '</div>';
 }
+// sofőr: a saját bejegyzését aznap javíthatja, máskor csak megnézheti
+function soforSajatNyit(t, x) {
+  var mai = String(x.rogzitve || '').slice(0, 10) === isoMa() && (t !== 'hiba' || x.bejelento === (S.A.en || {}).nev);
+  ({ tank: tankLap, hiba: hibaLap, kar: karLap })[t](x);
+  if (!mai) {
+    var f = document.querySelector('.lap form');
+    Array.prototype.forEach.call(f.querySelectorAll('input,select,textarea,button'), function (el) { el.disabled = true; });
+    Array.prototype.forEach.call(f.querySelectorAll('button[type=submit],.javaslat'), function (el) { el.remove(); });
+    var info = document.createElement('div'); info.className = 'info';
+    info.textContent = 'Ezt már nem javíthatod (csak a rögzítés napján). Ha hibás, szólj az irodának.';
+    f.insertBefore(info, f.firstChild);
+  }
+}
 function urlapAdat(form) {
   var o = {};
   Array.prototype.forEach.call(form.elements, function (el) { if (el.name) o[el.name] = el.value; });
@@ -1432,7 +1571,7 @@ function kuld(gomb, body, siker) {
       toast('Elmentve');
     } else {
       gomb.disabled = false; gomb.innerHTML = szoveg;
-      if (res && (res.hiba === 'kod' || res.hiba === 'zarolva')) { lapZar(); kilep(hibaSzoveg(res) + ' Lépj be újra.'); return; }
+      if (res && ['kod', 'zarolva', 'pin', 'inaktiv', 'nincspin'].indexOf(res.hiba) >= 0) { lapZar(); kilep(hibaSzoveg(res)); return; }
       toast(hibaSzoveg(res), true);
     }
   }, function () {
@@ -1456,6 +1595,26 @@ document.addEventListener('click', function (e) {
   var act = el.dataset.act;
   if (act === 'hatter') { if (e.target === el) lapZar(); return; }
   if (act === 'zar') return lapZar();
+  if (act === 'belep-mod') { S.belepMod = el.dataset.v; return rajzol(); }
+  if (act === 's-vissza') { S.belepLepes = S.belepLepes === 'pin' ? 'nev' : 'rkod'; return rajzol(); }
+  if (act === 's-nev') {
+    S.valasztott = (S.soforLista || []).filter(function (x) { return x.id === el.dataset.id; })[0];
+    S.belepLepes = 'pin'; rajzol();
+    var pm = document.getElementById('pin'); if (pm) pm.focus();
+    return;
+  }
+  if (act === 's-frissit') return frissit(false);
+  if (act === 's-hiba') { var sh = hibak().filter(function (x) { return x.id === el.dataset.id; })[0]; if (sh) return soforSajatNyit('hiba', sh); return; }
+  if (act === 's-sajat') {
+    var forr = { tank: tankolasok, hiba: hibak, kar: karok }[el.dataset.t]();
+    var sr = forr.filter(function (x) { return x.id === el.dataset.id; })[0];
+    if (sr) soforSajatNyit(el.dataset.t, sr);
+    return;
+  }
+  if (act === 'pin-torol') {
+    if (!torlesMegerosit(el, 'Biztosan törlöd? Koppints újra')) return;
+    return kuld(el, { a: 'sofor_pin_torles', id: el.dataset.id });
+  }
   if (act === 'fab') return fabLap();
   if (act === 'jarmu-uj') return jarmuLap();
   if (act === 'jarmu-szerk') return jarmuLap(el.dataset.id);
@@ -1603,6 +1762,9 @@ document.addEventListener('input', function (e) {
 });
 
 document.addEventListener('change', function (e) {
+  if (e.target.dataset && e.target.dataset.change === 's-busz') {
+    S.busz = e.target.value; lsSet(LS.busz, S.busz); return rajzol();
+  }
   if (e.target.dataset && e.target.dataset.change === 'km-hint') {
     var jh = jarmu(e.target.value), kmM = document.getElementById('m-km');
     if (kmM) kmM.placeholder = jh && jh.km !== '' && jh.km !== undefined ? 'eddig: ' + ezres(jh.km) : '';
@@ -1633,13 +1795,47 @@ document.addEventListener('submit', function (e) {
   e.preventDefault();
   var d = urlapAdat(f);
   var gomb = f.querySelector('button[type=submit]');
+  if (tipus === 's-rkod') {
+    var rk = String(d.rkod || '').trim();
+    gomb.disabled = true; gomb.innerHTML = '<span class="porog"></span>Ellenőrzés…';
+    apiGet({ a: 'sofor_lista', rkod: rk }).then(function (res) {
+      if (res && res.ok) {
+        S.rkod = rk; lsSet(LS.rkod, rk); S.soforLista = res.soforok; S.belepLepes = 'nev';
+        if (res.ceg) { S.ceg = res.ceg; lsSet(LS.ceg, res.ceg); }
+        rajzol();
+      } else { gomb.disabled = false; gomb.textContent = 'Tovább'; document.getElementById('belep-hiba').textContent = hibaSzoveg(res); }
+    }, function () { gomb.disabled = false; gomb.textContent = 'Tovább'; document.getElementById('belep-hiba').textContent = hibaSzoveg(null); });
+    return;
+  }
+  if (tipus === 's-pin') {
+    var v = S.valasztott || {}, pin = String(d.pin || '').trim();
+    var hibaHely = document.getElementById('belep-hiba');
+    if (!/^\d{4,6}$/.test(pin)) { hibaHely.textContent = 'A PIN 4–6 számjegy legyen.'; return; }
+    if (!v.vanPin && pin !== String(d.pin2 || '').trim()) { hibaHely.textContent = 'A két PIN nem egyezik.'; return; }
+    var gombSz = gomb.textContent;
+    gomb.disabled = true; gomb.innerHTML = '<span class="porog"></span>Belépés…';
+    var elso = v.vanPin ? Promise.resolve({ ok: true }) : apiPost0({ a: 'pin_beallit', rkod: S.rkod, sofor: v.id, pin: pin });
+    elso.then(function (r1) {
+      if (!r1 || !r1.ok) throw r1 || null;
+      return apiGet({ a: 'belep', sofor: v.id, pin: pin });
+    }).then(function (res) {
+      if (!res || !res.ok) throw res || null;
+      S.szerep = 'sofor'; S.sid = v.id; S.pin = pin; S.kod = '';
+      lsSet(LS.szerep, 'sofor'); lsSet(LS.sid, v.id); lsSet(LS.pin, pin); lsSet(LS.kod, null);
+      S.A = null; rajzol(); frissit(true);
+    }).catch(function (res) {
+      gomb.disabled = false; gomb.textContent = gombSz;
+      hibaHely.textContent = hibaSzoveg(res && res.hiba ? res : null);
+    });
+    return;
+  }
   if (tipus === 'belep') {
     var kod = String(d.kod || '').trim();
     if (!kod) return;
     gomb.disabled = true; gomb.innerHTML = '<span class="porog"></span>Ellenőrzés…';
     apiGet({ a: 'belep', kod: kod }).then(function (res) {
       if (res && res.ok) {
-        S.kod = kod; lsSet(LS.kod, kod);
+        S.kod = kod; lsSet(LS.kod, kod); S.szerep = 'iroda'; lsSet(LS.szerep, 'iroda'); S.sid = ''; S.pin = ''; lsSet(LS.sid, null); lsSet(LS.pin, null);
         if (res.ceg) { S.ceg = res.ceg; lsSet(LS.ceg, res.ceg); }
         S.A = null; rajzol(); frissit(true);
       } else {
@@ -1674,7 +1870,7 @@ document.addEventListener('submit', function (e) {
     if (d.rogzitette) lsSet('fk_nev', d.rogzitette);
     var szUj = !d.id;
     return kuld(gomb, { a: 'szerviz_mentes', rec: { id: d.id, jarmu: d.jarmu, datum: d.datum, km: d.km, tetelek: tl, reszletek: d.reszletek, muhely: d.muhely, koltseg: d.koltseg, esedek: esedek, hibak: hibaIdk, rogzitette: d.rogzitette } },
-      function () { if (szUj && utvonal().nev !== 'jarmu') location.hash = '#/jarmu/' + encodeURIComponent(d.jarmu); });
+      function () { if (szUj && utvonal().nev !== 'jarmu') if (!sofor_e()) location.hash = '#/jarmu/' + encodeURIComponent(d.jarmu); });
   }
   if (tipus === 'hiba') {
     if (!d.jarmu) { toast('Válaszd ki a járművet.', true); return; }
@@ -1682,7 +1878,7 @@ document.addEventListener('submit', function (e) {
     var hUj = !d.id;
     if (f.dataset.allapotGomb) { gomb = f.querySelector('[data-act=hiba-allapot]') || gomb; delete f.dataset.allapotGomb; }
     return kuld(gomb, { a: 'hiba_mentes', rec: { id: d.id, jarmu: d.jarmu, leiras: d.leiras, sulyossag: d.sulyossag, bejelento: d.bejelento, datum: d.datum, allapot: d.allapot } },
-      function () { if (hUj && utvonal().nev !== 'jarmu') location.hash = '#/jarmu/' + encodeURIComponent(d.jarmu); });
+      function () { if (hUj && utvonal().nev !== 'jarmu') if (!sofor_e()) location.hash = '#/jarmu/' + encodeURIComponent(d.jarmu); });
   }
   if (tipus === 'tank' || tipus === 'kar' || tipus === 'gumi') {
     if (!d.jarmu) { toast('Válaszd ki a járművet.', true); return; }
@@ -1700,7 +1896,7 @@ document.addEventListener('submit', function (e) {
     var nUj = !d.id;
     delete d.fix;
     return kuld(gomb, { a: 'naplo_mentes', tipus: tipus, rec: d }, function () {
-      if (nUj) { S.fulJarmu = d.jarmu; S.ful = { tank: 'Tankolás', kar: 'Kárügyek', gumi: 'Gumik' }[tipus]; if (utvonal().nev !== 'jarmu' || utvonal().id !== d.jarmu) location.hash = '#/jarmu/' + encodeURIComponent(d.jarmu); }
+      if (nUj) { S.fulJarmu = d.jarmu; S.ful = { tank: 'Tankolás', kar: 'Kárügyek', gumi: 'Gumik' }[tipus]; if (utvonal().nev !== 'jarmu' || utvonal().id !== d.jarmu) if (!sofor_e()) location.hash = '#/jarmu/' + encodeURIComponent(d.jarmu); }
     });
   }
   if (tipus === 'km') {
@@ -1719,11 +1915,11 @@ document.addEventListener('keydown', function (e) { if (e.key === 'Escape') lapZ
 
 /* ───── indulás ───── */
 rajzol();
-if (S.kod) frissit(true);
+if (belepve()) frissit(true);
 document.addEventListener('visibilitychange', function () {
-  if (document.visibilityState === 'visible' && S.kod && !document.querySelector('.lap')) frissit(true);
+  if (document.visibilityState === 'visible' && belepve() && !document.querySelector('.lap')) frissit(true);
 });
-window.addEventListener('online', function () { if (S.kod) frissit(true); });
+window.addEventListener('online', function () { if (belepve()) frissit(true); });
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('sw.js').catch(function () {});
 }
