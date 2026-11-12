@@ -1,7 +1,7 @@
 // Flottakezelő – offline gyorsítótár. Új kiadásnál a VERZIO-t emeld.
-var VERZIO = 'flotta-0.9.3';
+var VERZIO = 'flotta-0.9.4';
 var FAJLOK = ['./', './index.html', './config.js', './manifest.webmanifest',
-  './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
+  './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(VERZIO).then(function (c) { return c.addAll(FAJLOK); }).then(function () { return self.skipWaiting(); }));
