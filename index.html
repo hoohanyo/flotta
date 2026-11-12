@@ -14,7 +14,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
-<script>(function(){var t;try{t=localStorage.getItem('fk_tema')}catch(e){}var d=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.setAttribute('data-tema',t==='sotet'||t==='vilagos'?t:(d?'sotet':'vilagos'));})();</script>
+<script>(function(){var t;try{t=localStorage.getItem('fk_tema')}catch(e){}document.documentElement.setAttribute('data-tema',t==='sotet'?'sotet':'vilagos');})();</script>
 <script src="config.js"></script>
 <style>
 :root,html[data-tema="vilagos"]{
@@ -196,7 +196,6 @@ nav.menu .in{max-width:640px;margin:0 auto;height:72px;display:flex;justify-cont
 nav.menu a{display:flex;flex-direction:column;align-items:center;gap:4px;width:70px;min-height:44px;text-decoration:none;color:var(--dim);font-size:11px;font-weight:500;position:relative}
 nav.menu a.be{color:var(--acc);font-weight:700}
 nav.menu a .jelveny{top:-6px;right:10px}
-nav.menu .marka,nav.menu .menualj{display:none}
 .fab{position:fixed;right:max(20px,calc(50% - 300px));bottom:calc(96px + var(--sab));width:58px;height:58px;border-radius:20px;background:var(--accBg);color:var(--accText);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(33,96,232,.38);border:0;z-index:21}
 /* lap (bottom sheet) */
 .hatter{position:fixed;inset:0;background:var(--overlay);z-index:40;display:flex;align-items:flex-end;justify-content:center;animation:be .15s}
@@ -274,7 +273,9 @@ nav.menu .marka,nav.menu .menualj{display:none}
 .javaslat{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
 .javaslat button{height:32px;padding:0 11px;border-radius:999px;background:var(--card2);border:1px solid var(--line3);color:var(--soft);font-size:13px;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .javaslat button:active{background:var(--accBg);color:var(--accText)}
-.temaszeg{margin:0}
+.temavalaszto{display:inline-flex;gap:4px;padding:4px;border-radius:14px;background:var(--card2);border:1px solid var(--line);flex-shrink:0}
+.temavalaszto button{width:44px;height:38px;border-radius:10px;border:0;background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.temavalaszto button.be{background:var(--accBg);color:var(--accText)}
 /* táblagép / asztali */
 @media (min-width:700px){
   .hero{margin:0 0 0;border-radius:24px;padding:26px 28px 70px}
@@ -282,20 +283,8 @@ nav.menu .marka,nav.menu .menualj{display:none}
   .rajta{margin-top:-48px;padding:0 16px}
 }
 @media (min-width:1100px){
-  body.van-menu #app{max-width:1100px;margin:0 0 0 248px;padding:28px 40px 120px}
-  body.van-menu nav.menu{top:0;right:auto;width:232px;border-top:0;border-right:1px solid var(--line);background:var(--card);padding:0}
-  body.van-menu nav.menu .in{height:100%;max-width:none;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:4px;padding:22px 14px}
-  body.van-menu nav.menu .marka{display:flex;align-items:center;gap:10px;padding:0 8px 18px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:17px;color:var(--text)}
-  body.van-menu nav.menu .marka i{width:36px;height:36px;border-radius:11px;background:var(--hero);display:flex;align-items:center;justify-content:center;color:#fff}
-  body.van-menu nav.menu .marka small{display:block;font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:var(--muted)}
-  body.van-menu nav.menu a{flex-direction:row;width:auto;min-height:42px;gap:12px;padding:0 12px;border-radius:12px;font-size:14px;color:var(--soft)}
-  body.van-menu nav.menu a.be{background:var(--infoS);color:var(--acc)}
-  body.van-menu nav.menu a:hover:not(.be){background:var(--card2)}
-  body.van-menu nav.menu a .jelveny{position:static;margin-left:auto;border:0}
-  body.van-menu nav.menu .menualj{display:block;margin-top:auto;padding:12px 4px 0;border-top:1px solid var(--line2)}
-  body.van-menu nav.menu .menualj .kicsi{display:block;margin:0 6px 8px}
-  body.van-menu .fab{right:40px;bottom:40px}
-  body.van-menu #toast{bottom:40px}
+  #app{max-width:980px}
+  .fab{right:calc(50% - 470px)}
   .ketoszlop{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 24px;align-items:start}
 }
 </style>
@@ -309,7 +298,7 @@ nav.menu .marka,nav.menu .menualj{display:none}
 (function () {
 'use strict';
 
-var VERZIO = '0.8.0';
+var VERZIO = '0.8.1';
 var API = (window.FLOTTA_API || '').trim();
 var LS = { kod: 'fk_kod', ceg: 'fk_ceg', adat: 'fk_adat', szerep: 'fk_szerep', sid: 'fk_sid', pin: 'fk_pin', busz: 'fk_busz', rkod: 'fk_rkod' };
 
@@ -338,24 +327,25 @@ function hitel() { return sofor_e() ? { sofor: S.sid, pin: S.pin } : { kod: S.ko
 function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 function lsSet(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
 
-/* ───── téma: auto (a készülék beállítása) | vilagos | sotet ───── */
-var SOTET_MQ = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
-function temaBeall() { var t = lsGet('fk_tema'); return t === 'vilagos' || t === 'sotet' ? t : 'auto'; }
-function temaAktiv() { var t = temaBeall(); return t !== 'auto' ? t : (SOTET_MQ && SOTET_MQ.matches ? 'sotet' : 'vilagos'); }
+/* ───── téma: vilagos (alap) | sotet – készülékenként megjegyezve ───── */
+function temaAktiv() { return lsGet('fk_tema') === 'sotet' ? 'sotet' : 'vilagos'; }
 function temaAlkalmaz() {
   var t = temaAktiv();
   document.documentElement.setAttribute('data-tema', t);
   var m = document.querySelector('meta[name=theme-color]');
   if (m) m.setAttribute('content', t === 'sotet' ? '#0A0F1C' : '#F2F5FA');
 }
-function temaValt(v) { lsSet('fk_tema', v === 'auto' ? null : v); temaAlkalmaz(); }
-if (SOTET_MQ) { var mqF = function () { if (temaBeall() === 'auto') { temaAlkalmaz(); rajzol(); } }; if (SOTET_MQ.addEventListener) SOTET_MQ.addEventListener('change', mqF); else if (SOTET_MQ.addListener) SOTET_MQ.addListener(mqF); }
+function temaValt(v) { lsSet('fk_tema', v === 'sotet' ? 'sotet' : 'vilagos'); temaAlkalmaz(); }
 temaAlkalmaz();
-function temaSzegmens(rovid) {
-  var t = temaBeall();
-  return '<div class="szegmens temaszeg" role="group" aria-label="Megjelenés">' + [['auto', rovid ? 'Auto' : 'Automatikus'], ['vilagos', 'Világos'], ['sotet', 'Sötét']].map(function (x) {
-    return '<button type="button" class="' + (t === x[0] ? 'be' : '') + '" aria-pressed="' + (t === x[0]) + '" data-act="tema" data-v="' + x[0] + '">' + x[1] + '</button>';
-  }).join('') + '</div>';
+function temaValaszto() {
+  var t = temaAktiv();
+  return '<div class="temavalaszto" role="group" aria-label="Megjelenés">' +
+    '<button type="button" class="' + (t === 'vilagos' ? 'be' : '') + '" aria-pressed="' + (t === 'vilagos') + '" aria-label="Világos" title="Világos" data-act="tema" data-v="vilagos">' + IK.nap + '</button>' +
+    '<button type="button" class="' + (t === 'sotet' ? 'be' : '') + '" aria-pressed="' + (t === 'sotet') + '" aria-label="Sötét" title="Sötét" data-act="tema" data-v="sotet">' + IK.hold + '</button></div>';
+}
+function temaGomb(osztaly) {
+  var t = temaAktiv();
+  return '<button type="button" class="' + osztaly + '" data-act="tema" data-v="' + (t === 'sotet' ? 'vilagos' : 'sotet') + '" aria-label="' + (t === 'sotet' ? 'Világos mód' : 'Sötét mód') + '" title="' + (t === 'sotet' ? 'Világos mód' : 'Sötét mód') + '">' + (t === 'sotet' ? IK.nap : IK.hold) + '</button>';
 }
 function koszones() { var o = new Date().getHours(); return o < 9 ? 'Jó reggelt' : o < 18 ? 'Jó napot' : 'Jó estét'; }
 
@@ -675,7 +665,6 @@ function rajzol(belepUzenet) {
   }
   var off = S.offline ? '<div class="offline">' + IK.felho + 'Nincs kapcsolat – a legutóbb letöltött adatokat látod.</div>' : '';
   function tesz(html) { return html.indexOf('<!--OFF-->') >= 0 ? html.replace('<!--OFF-->', off) : off + html; }
-  document.body.classList.toggle('van-menu', belepve() && !sofor_e());
   if (!belepve()) { menuHely.innerHTML = ''; app.innerHTML = nezetBelepes(belepUzenet); return; }
   if (sofor_e()) {
     menuHely.innerHTML = '';
@@ -704,13 +693,11 @@ function menuHtml(akt) {
   }
   return '<button type="button" class="fab" data-act="fab" aria-label="Új bejegyzés">' + IK.plusz + '</button>' +
     '<nav class="menu" aria-label="Fő menü"><div class="in">' +
-    '<div class="marka"><i>' + IK.busz + '</i><span>Flottakezelő<small>' + esc((S.A && S.A.ceg) || '') + '</small></span></div>' +
     a('attekintes', '#/', IK.attek, 'Áttekintés') +
     a('jarmuvek', '#/jarmuvek', IK.busz, 'Járművek') +
     a('emlek', '#/emlek', IK.csengo, 'Emlékeztetők', lejart ? '<span class="jelveny">' + lejart + '</span>' : '') +
     a('soforok', '#/soforok', IK.ember, 'Sofőrök') +
     a('tobb', '#/tobb', IK.menu, 'Több') +
-    '<div class="menualj"><span class="kicsi">Megjelenés</span>' + temaSzegmens(true) + '</div>' +
     '</div></nav>';
 }
 
@@ -758,10 +745,9 @@ function nezetSoforFo() {
   var js = jarmuvek();
   if (!jarmu(S.busz) && js.length) { S.busz = js[0].id; lsSet(LS.busz, S.busz); }
   var j = jarmu(S.busz);
-  var tema = temaAktiv();
   var h = '<div class="hero"><div class="hsor"><div><div class="kicsi">' + esc(A.ceg || 'Flotta') + '</div><h1>Szia, ' + esc(String(en.nev || '').split(' ').slice(-1)[0] || en.nev) + '!</h1>' +
     '<div class="al">' + ma.getFullYear() + '. ' + HONAP[ma.getMonth()] + ' ' + ma.getDate() + '., ' + NAP[ma.getDay()] + '</div></div>' +
-    '<div class="hgombok"><button type="button" class="hgomb" data-act="tema" data-v="' + (tema === 'sotet' ? 'vilagos' : 'sotet') + '" aria-label="' + (tema === 'sotet' ? 'Világos mód' : 'Sötét mód') + '">' + (tema === 'sotet' ? IK.nap : IK.hold) + '</button>' +
+    '<div class="hgombok">' + temaGomb('hgomb') +
     '<button type="button" class="hgomb" data-act="s-frissit" aria-label="Frissítés">' + IK.frissit + '</button></div></div>';
   if (!js.length) return h + '<!--OFF--></div><div class="kartya ures" style="margin-top:16px">Még nincs busz a rendszerben. Szólj az irodának.</div>' + soforLab();
   h += '<div class="mezo"><label for="s-busz">Melyik busszal vagy?</label><select id="s-busz" data-change="s-busz" style="height:56px;font-size:18px;font-weight:600">' +
@@ -845,7 +831,7 @@ function nezetAttekintes() {
     warn.length ? warn.length + ' tétel hamarosan esedékes, lejárt nincs.' : js.length ? 'Nincs lejárt vagy közeli határidő.' : 'Kezdjük a járművek felvételével.';
   var h = '<div class="hero"><div class="hsor"><div><div class="kicsi">' + esc(A.ceg || 'Flotta') + ' · Áttekintés</div><h1>' + koszones() + '!</h1>' +
     '<div class="al">' + esc(mondat) + '<br>' + datum + '</div></div>' +
-    '<div class="hgombok"><a class="hgomb" href="#/emlek" aria-label="Emlékeztetők">' + IK.csengo + (bad.length ? '<span class="jelveny">' + bad.length + '</span>' : '') + '</a></div></div>';
+    '<div class="hgombok">' + temaGomb('hgomb') + '<a class="hgomb" href="#/emlek" aria-label="Emlékeztetők">' + IK.csengo + (bad.length ? '<span class="jelveny">' + bad.length + '</span>' : '') + '</a></div></div>';
   if (bad.length) h += '<a class="sav bad" href="#/emlek"><span class="ik">' + IK.harom + '</span><span style="flex-grow:1"><div class="c">' + bad.length + ' lejárt tétel</div><div class="s">' + (warn.length ? 'és ' + warn.length + ' hamarosan esedékes' : 'minél előbb intézni kell') + '</div></span>' + IK.jobbra + '</a>';
   else if (warn.length) h += '<a class="sav warn" href="#/emlek"><span class="ik">' + IK.csengo + '</span><span style="flex-grow:1"><div class="c">' + warn.length + ' hamarosan esedékes</div><div class="s">nincs lejárt tétel</div></span>' + IK.jobbra + '</a>';
   else h += '<div class="sav ok"><span class="ik">' + IK.pipa + '</span><span style="flex-grow:1"><div class="c">Minden rendben</div><div class="s">' + (tl.length ? 'nincs lejárt vagy közeli határidő' : 'még nincs rögzített lejárat') + '</div></span></div>';
@@ -1185,8 +1171,8 @@ function nezetEmlek() {
 function nezetTobb() {
   var A = S.A, n = A.naptar || {};
   var h = '<div class="fej"><div><h1>Több</h1><div class="al">' + esc(A.ceg || 'Flotta') + '</div></div></div>';
-  h += '<div class="szakasz" style="margin-top:4px"><h2>Megjelenés</h2></div><div class="kartya infok">' + temaSzegmens() +
-    '<div style="font-size:12px;color:var(--muted);margin-top:8px">Automatikus: a telefon vagy a gép beállítását követi (nappal világos, este sötét, ha így van beállítva). A választás csak ezen a készüléken érvényes.</div></div>';
+  h += '<div class="szakasz" style="margin-top:4px"><h2>Megjelenés</h2></div><div class="kartya infok" style="display:flex;align-items:center;gap:14px">' + temaValaszto() +
+    '<span style="font-size:13px;color:var(--muted)">Világos vagy sötét. Ezen a készüléken megjegyzi.</span></div>';
   h += '<div class="szakasz"><h2>Emlékeztetők a naptárban</h2></div>';
   if (n.be) {
     h += '<div class="kartya infok">Minden lejárat bekerül a <b>' + esc(n.nev || 'Flotta lejáratok') + '</b> nevű Google Naptárba, a beállított napokkal előtte és a lejárat napján is. Így a telefonod akkor is szól, ha az oldalt nem nyitod meg.' +
