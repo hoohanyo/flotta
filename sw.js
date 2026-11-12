@@ -1,5 +1,5 @@
 // Flottakezelő – offline gyorsítótár. Új kiadásnál a VERZIO-t emeld.
-var VERZIO = 'flotta-0.9.1';
+var VERZIO = 'flotta-0.9.2';
 var FAJLOK = ['./', './index.html', './config.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
