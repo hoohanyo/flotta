@@ -336,7 +336,7 @@ nav.menu a .jelveny{top:-6px;right:10px}
 (function () {
 'use strict';
 
-var VERZIO = '0.9.0';
+var VERZIO = '0.9.1';
 var API = (window.FLOTTA_API || '').trim();
 var LS = { kod: 'fk_kod', ceg: 'fk_ceg', adat: 'fk_adat', szerep: 'fk_szerep', sid: 'fk_sid', pin: 'fk_pin', busz: 'fk_busz', rkod: 'fk_rkod' };
 
@@ -1874,7 +1874,8 @@ function ellLap(o) {
       var pip = !uj && hl.indexOf(t) < 0;
       return '<label class="pipasor"><input type="checkbox" name="ok_t" value="' + esc(t) + '"' + (pip ? ' checked' : '') + '><span>' + esc(t) + '</span></label>';
     }).join('') +
-    '<div class="ket" style="margin-top:12px">' + mezo('datum', 'Dátum', o.datum || isoMa(), ' type="date"') + mezo('km', 'Km-óra állás', ezres(o.km), ' inputmode="numeric" data-ezres placeholder="' + (j && j.km !== '' && j.km !== undefined ? 'eddig: ' + ezres(j.km) : '') + '"') + '</div>' +
+    // km-t itt nem kérünk (az a nap végi Km-állásnál van); a sofőrnél a dátum mindig a mai nap
+    (sofor_e() ? '<input type="hidden" name="datum" value="' + esc(o.datum || isoMa()) + '"><div style="height:8px"></div>' : '<div style="margin-top:12px">' + mezo('datum', 'Dátum', o.datum || isoMa(), ' type="date"') + '</div>') +
     mezo('megj', 'Megjegyzés', o.megj, ' placeholder="pl. jobb tükör repedt"') +
     (sofor_e() ? '' : mezoJ('sofor', 'Sofőr', o.sofor, '', szemelyek())) +
     '<button class="gomb" type="submit">Mentés</button>' +
