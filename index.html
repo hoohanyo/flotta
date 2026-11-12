@@ -202,6 +202,9 @@ nav.menu a .jelveny{top:-6px;right:10px}
 .gumik .g:last-child{border-bottom:0}
 .gumik .g b{font-weight:600}
 .gumik .g span{color:var(--muted);text-align:right}
+.javaslat{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.javaslat button{height:32px;padding:0 11px;border-radius:999px;background:var(--card2);border:1px solid #2E3B45;color:var(--soft);font-size:13px;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.javaslat button:active{background:var(--acc);color:var(--accText)}
 </style>
 </head>
 <body>
@@ -213,7 +216,7 @@ nav.menu a .jelveny{top:-6px;right:10px}
 (function () {
 'use strict';
 
-var VERZIO = '0.5.1';
+var VERZIO = '0.5.2';
 var API = (window.FLOTTA_API || '').trim();
 var LS = { kod: 'fk_kod', ceg: 'fk_ceg', adat: 'fk_adat' };
 
@@ -277,7 +280,7 @@ function isoMa() { var d = ma0(); return d.getFullYear() + '-' + p2(d.getMonth()
 function p2(n) { return (n < 10 ? '0' : '') + n; }
 function fmtD(s) { var d = isoDate(s); return d ? d.getFullYear() + '.' + p2(d.getMonth() + 1) + '.' + p2(d.getDate()) : ''; }
 function napKul(s) { var d = isoDate(s); return d ? Math.round((d - ma0()) / 86400000) : null; }
-function km(n) { return n === '' || n === null || n === undefined ? '' : String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+function km(n) { return n === '' || n === null || n === undefined ? '' : String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
 function figyNapok(s) {
   var a = String(s || '').split(/[^0-9]+/).map(Number).filter(function (n) { return n > 0 && n <= 365; });
   a = a.filter(function (n, i) { return a.indexOf(n) === i; }).sort(function (x, y) { return y - x; });
@@ -413,7 +416,7 @@ function szamF(n, dec) {
   if (n === '' || n === null || n === undefined || isNaN(Number(n))) return '';
   var p = Number(n).toFixed(dec || 0).split('.');
   var t = p[1] ? p[1].replace(/0+$/, '') : '';
-  return p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + (t ? ',' + t : '');
+  return p[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (t ? ',' + t : '');
 }
 // fogyasztás tele-tele módszerrel: két tele tank között tankolt liter / megtett km
 function fogyasztas(jid) {
@@ -1140,7 +1143,7 @@ function jarmuLap(id) {
     mezo('tipus', 'Gyártmány, típus', j.tipus, ' placeholder="pl. VDL Futura FHD2-129"') +
     '<div class="ket">' + mezo('evjarat', 'Évjárat', j.evjarat, ' inputmode="numeric" placeholder="2017"') + mezo('ules', 'Ülőhely', j.ules, ' placeholder="51+1+1"') + '</div>' +
     mezo('alvaz', 'Alvázszám', j.alvaz, ' autocapitalize="characters"') +
-    (id ? '' : '<div class="ket">' + mezo('km', 'Km-állás', '', ' inputmode="numeric"') + '<div></div></div>') +
+    (id ? '' : '<div class="ket">' + mezo('km', 'Km-állás', '', ' inputmode="numeric" data-ezres') + '<div></div></div>') +
     valaszto('allapot', 'Állapot', ['Forgalomban', 'Szervizben', 'Áll', 'Eladva'], j.allapot || 'Forgalomban') +
     '<div class="mezo"><label for="m-megj">Megjegyzés</label><textarea id="m-megj" name="megj">' + esc(j.megj || '') + '</textarea></div>' +
     '<button class="gomb" type="submit">Mentés</button>' +
@@ -1203,7 +1206,7 @@ function kmLap(id) {
   lapNyit(lapFej('Km-állás') + '<form data-form="km" autocomplete="off">' +
     (j ? '<input type="hidden" name="id" value="' + esc(j.id) + '"><div class="mezo"><span class="lbl">Jármű</span><div style="font-size:16px;font-weight:600">' + esc(j.rendszam) + (j.km !== '' && j.km !== undefined ? ' <span style="color:var(--muted);font-weight:500;font-size:13px">· eddig ' + km(j.km) + ' km</span>' : '') + '</div></div>'
       : '<div class="mezo"><label for="m-id">Jármű *</label><select id="m-id" name="id" required><option value="">– válassz –</option>' + lista.map(function (x) { return '<option value="' + esc(x.id) + '">' + esc(x.rendszam + (x.km !== '' && x.km !== undefined ? ' · ' + km(x.km) + ' km' : '')) + '</option>'; }).join('') + '</select></div>') +
-    '<div class="ket">' + mezo('km', 'Km-állás *', '', ' inputmode="numeric" required') + mezo('datum', 'Dátum', isoMa(), ' type="date"') + '</div>' +
+    '<div class="ket">' + mezo('km', 'Km-állás *', '', ' inputmode="numeric" data-ezres required') + mezo('datum', 'Dátum', isoMa(), ' type="date"') + '</div>' +
     '<button class="gomb" type="submit">Mentés</button></form>');
 }
 
@@ -1225,16 +1228,16 @@ function szervizLap(o) {
   lapNyit(lapFej(uj ? 'Szerviz rögzítése' : 'Szervizbejegyzés') + '<form data-form="szerviz" autocomplete="off"><input type="hidden" name="id" value="' + esc(o.id || '') + '">' +
     jarmuValaszto('jarmu', jid, 'sz-jarmu') +
     '<div class="ket">' + mezo('datum', 'Dátum *', o.datum || isoMa(), ' type="date" required') +
-    mezo('km', 'Km-állás', o.km, ' inputmode="numeric" placeholder="' + (j && j.km !== '' && j.km !== undefined ? 'eddig: ' + km(j.km) : '') + '"') + '</div>' +
+    mezo('km', 'Km-állás', ezres(o.km), ' inputmode="numeric" data-ezres placeholder="' + (j && j.km !== '' && j.km !== undefined ? 'eddig: ' + ezres(j.km) : '') + '"') + '</div>' +
     '<div class="mezo"><span class="lbl">Mit csináltak?</span><div class="chipek" id="sz-tetelek" style="margin-bottom:0">' + lista.map(function (t) {
       var be = (o.tetelek || []).indexOf(t) >= 0;
       return '<button type="button" class="chip' + (be ? ' be' : '') + '" aria-pressed="' + be + '" data-act="sz-tetel" data-v="' + esc(t) + '">' + esc(t) + '</button>';
     }).join('') + '</div></div>' +
     '<div class="mezo"><label for="m-reszletek">Részletek</label><textarea id="m-reszletek" name="reszletek" placeholder="pl. olaj + olajszűrő, első fékbetét">' + esc(o.reszletek || '') + '</textarea></div>' +
     '<div id="sz-esedek"></div>' +
-    '<div class="ket">' + mezo('muhely', 'Műhely', o.muhely) + mezo('koltseg', 'Költség (Ft)', o.koltseg, ' inputmode="numeric"') + '</div>' +
+    '<div class="ket">' + mezoJ('muhely', 'Műhely', o.muhely, '', gyakori(mezoErtekek(szervizek(), 'muhely'))) + mezo('koltseg', 'Költség (Ft)', ezres(o.koltseg), ' inputmode="numeric" data-ezres') + '</div>' +
     '<div id="sz-hibak"></div>' +
-    mezo('rogzitette', 'Rögzítette', o.rogzitette !== undefined && !uj ? o.rogzitette : (lsGet('fk_nev') || '')) +
+    mezoJ('rogzitette', 'Rögzítette', o.rogzitette !== undefined && !uj ? o.rogzitette : (lsGet('fk_nev') || ''), '', szemelyek()) +
     '<button class="gomb" type="submit">Mentés</button>' +
     (uj ? '' : '<button class="gomb torol" type="button" data-act="szerviz-torol" data-id="' + esc(o.id) + '">Bejegyzés törlése</button>') +
     '</form>');
@@ -1257,7 +1260,7 @@ function szEsedekRajzol() {
   hely.innerHTML = '<div class="alcim">Következő esedékesség (ha tudod)</div>' + tl.map(function (t) {
     var m = S.szForm.esedek[t] || {};
     return '<div class="esedek"><div class="lbl">' + esc(t) + '</div><div class="ket">' +
-      '<input data-es="' + esc(t) + '" data-mezo="km" inputmode="numeric" aria-label="' + esc(t) + ' – km-állásnál" placeholder="km-állásnál" value="' + esc(m.km === undefined ? '' : m.km) + '">' +
+      '<input data-es="' + esc(t) + '" data-mezo="km" inputmode="numeric" data-ezres aria-label="' + esc(t) + ' – km-állásnál" placeholder="km-állásnál" value="' + esc(ezres(m.km)) + '">' +
       '<input data-es="' + esc(t) + '" data-mezo="datum" type="date" aria-label="' + esc(t) + ' – dátum" value="' + esc(m.datum || '') + '"></div></div>';
   }).join('');
 }
@@ -1289,7 +1292,7 @@ function hibaLap(o) {
     '<div class="mezo"><span class="lbl">Mennyire sürgős?</span><div class="szegmens" role="group" aria-label="Súlyosság" style="margin-bottom:0">' + ['Sürgős', 'Normál', 'Apró'].map(function (x) {
       return '<button type="button" class="' + (x === suly ? 'be' : '') + '" aria-pressed="' + (x === suly) + '" data-act="hiba-suly" data-v="' + x + '">' + x + '</button>';
     }).join('') + '</div></div>' +
-    '<div class="ket">' + mezo('bejelento', 'Bejelentő', uj ? (lsGet('fk_nev') || '') : o.bejelento) + mezo('datum', 'Dátum', o.datum || isoMa(), ' type="date"') + '</div>' +
+    '<div class="ket">' + mezoJ('bejelento', 'Bejelentő', uj ? (lsGet('fk_nev') || '') : o.bejelento, '', szemelyek()) + mezo('datum', 'Dátum', o.datum || isoMa(), ' type="date"') + '</div>' +
     '<button class="gomb" type="submit">Mentés</button>' +
     (uj ? '' : all === 'Javítva'
       ? '<button class="gomb masod" type="button" data-act="hiba-allapot" data-v="Nyitott" style="margin-top:10px">Újranyitom</button>'
@@ -1318,16 +1321,17 @@ function tankLap(o) {
   lapNyit(lapFej(uj ? 'Tankolás' : 'Tankolás szerkesztése') + '<form data-form="tank" autocomplete="off"><input type="hidden" name="id" value="' + esc(o.id || '') + '">' +
     jarmuValaszto('jarmu', o.jarmu || '', 'km-hint') +
     '<div class="ket">' + mezo('datum', 'Dátum *', o.datum || isoMa(), ' type="date" required') +
-    mezo('km', 'Km-állás *', o.km, ' inputmode="numeric" required placeholder="' + (j && j.km !== '' && j.km !== undefined ? 'eddig: ' + km(j.km) : '') + '"') + '</div>' +
+    mezo('km', 'Km-állás *', ezres(o.km), ' inputmode="numeric" data-ezres required placeholder="' + (j && j.km !== '' && j.km !== undefined ? 'eddig: ' + ezres(j.km) : '') + '"') + '</div>' +
     '<div class="ket">' + mezo('liter', 'Gázolaj (liter) *', o.liter !== undefined ? String(o.liter).replace('.', ',') : '', ' inputmode="decimal" required') +
     mezo('adblue', 'AdBlue (liter)', o.adblue !== undefined ? String(o.adblue).replace('.', ',') : '', ' inputmode="decimal"') + '</div>' +
     valGomb('tele', 'Tele lett a tank?', [['Igen', 'Tele'], ['Nem', 'Részleges']], o.tele || 'Igen') +
     '<div class="ket">' + mezo('egysegar', 'Egységár (Ft/l)', o.egysegar !== undefined ? String(o.egysegar).replace('.', ',') : '', ' inputmode="decimal"') +
-    mezo('osszeg', 'Összeg (Ft)', o.osszeg, ' inputmode="numeric"') + '</div>' +
+    mezo('osszeg', 'Összeg (Ft)', ezres(o.osszeg), ' inputmode="numeric" data-ezres') + '</div>' +
     '<div class="mezo" style="margin-top:-6px"><span class="tipp">Elég az egyiket megadni, a másikat kiszámolja.</span></div>' +
-    '<div class="ket">' + mezo('hely', 'Helyszín', o.hely, ' placeholder="pl. MOL Győr"') + mezo('sofor', 'Sofőr', o.sofor, ' list="soforok-lista"') + '</div>' + soforLista() +
+    mezoJ('hely', 'Helyszín', o.hely, ' placeholder="pl. MOL Győr"', gyakori(mezoErtekek(tankolasok(), 'hely'))) +
+    mezoJ('sofor', 'Sofőr', o.sofor, '', szemelyek()) +
     mezo('megj', 'Megjegyzés', o.megj) +
-    mezo('rogzitette', 'Rögzítette', uj ? (lsGet('fk_nev') || '') : o.rogzitette) +
+    mezoJ('rogzitette', 'Rögzítette', uj ? (lsGet('fk_nev') || '') : o.rogzitette, '', szemelyek()) +
     '<button class="gomb" type="submit">Mentés</button>' +
     (uj ? '' : '<button class="gomb torol" type="button" data-act="naplo-torol" data-tipus="tank" data-id="' + esc(o.id) + '">Tankolás törlése</button>') +
     '</form>');
@@ -1337,15 +1341,18 @@ function karLap(o) {
   var uj = !o.id;
   lapNyit(lapFej(uj ? 'Kárügy rögzítése' : 'Kárügy') + '<form data-form="kar" autocomplete="off"><input type="hidden" name="id" value="' + esc(o.id || '') + '">' +
     jarmuValaszto('jarmu', o.jarmu || '') +
-    '<div class="ket">' + mezo('datum', 'Dátum *', o.datum || isoMa(), ' type="date" required') + mezo('hely', 'Helyszín', o.hely) + '</div>' +
+    mezo('datum', 'Dátum *', o.datum || isoMa(), ' type="date" required') +
+    mezoJ('hely', 'Helyszín', o.hely, '', gyakori(mezoErtekek(karok(), 'hely'))) +
     '<div class="mezo"><label for="m-leiras">Mi történt? *</label><textarea id="m-leiras" name="leiras" required placeholder="pl. tolatásnál oszlopnak ütközött, hátsó lökhárító">' + esc(o.leiras || '') + '</textarea></div>' +
-    '<div class="ket">' + mezo('sofor', 'Sofőr', o.sofor, ' list="soforok-lista"') + mezo('masik', 'Másik fél', o.masik, ' placeholder="név, rendszám"') + '</div>' + soforLista() +
+    mezoJ('sofor', 'Sofőr', o.sofor, '', szemelyek()) +
+    mezo('masik', 'Másik fél', o.masik, ' placeholder="név, rendszám"') +
     valGomb('rendorseg', 'Rendőrség kint volt?', [['Nem'], ['Igen']], o.rendorseg || 'Nem') +
-    '<div class="ket">' + mezo('biztosito', 'Biztosító', o.biztosito) + mezo('karszam', 'Kárszám', o.karszam) + '</div>' +
-    mezo('osszeg', 'Becsült kár (Ft)', o.osszeg, ' inputmode="numeric"') +
+    mezoJ('biztosito', 'Biztosító', o.biztosito, '', gyakori(mezoErtekek(karok(), 'biztosito'))) +
+    mezo('karszam', 'Kárszám', o.karszam) +
+    mezo('osszeg', 'Becsült kár (Ft)', ezres(o.osszeg), ' inputmode="numeric" data-ezres') +
     valGomb('allapot', 'Állapot', [['Bejelentve'], ['Folyamatban'], ['Lezárva']], o.allapot || 'Bejelentve') +
     mezo('megj', 'Megjegyzés', o.megj) +
-    mezo('rogzitette', 'Rögzítette', uj ? (lsGet('fk_nev') || '') : o.rogzitette) +
+    mezoJ('rogzitette', 'Rögzítette', uj ? (lsGet('fk_nev') || '') : o.rogzitette, '', szemelyek()) +
     '<button class="gomb" type="submit">Mentés</button>' +
     (uj ? '' : '<button class="gomb torol" type="button" data-act="naplo-torol" data-tipus="kar" data-id="' + esc(o.id) + '">Kárügy törlése</button>') +
     '</form>');
@@ -1356,19 +1363,56 @@ function gumiLap(o) {
   lapNyit(lapFej(uj ? 'Gumi' : 'Gumi bejegyzés') + '<form data-form="gumi" autocomplete="off"><input type="hidden" name="id" value="' + esc(o.id || '') + '">' +
     jarmuValaszto('jarmu', o.jarmu || '', 'km-hint') +
     '<div class="ket">' + mezo('datum', 'Dátum *', o.datum || isoMa(), ' type="date" required') +
-    mezo('km', 'Km-állás', o.km, ' inputmode="numeric" placeholder="' + (j && j.km !== '' && j.km !== undefined ? 'eddig: ' + km(j.km) : '') + '"') + '</div>' +
+    mezo('km', 'Km-állás', ezres(o.km), ' inputmode="numeric" data-ezres placeholder="' + (j && j.km !== '' && j.km !== undefined ? 'eddig: ' + ezres(j.km) : '') + '"') + '</div>' +
     '<div class="ket">' + valaszto('muvelet', 'Mi történt?', ['Felszerelés', 'Csere', 'Szezonváltás', 'Forgatás', 'Javítás', 'Mérés'], o.muvelet || 'Csere') +
     valaszto('pozicio', 'Hol?', ['Összes', 'Első tengely', 'Hajtott tengely', 'Pótkerék'], o.pozicio || 'Összes') + '</div>' +
-    '<div class="ket">' + mezo('gyartmany', 'Gyártmány, mintázat', o.gyartmany, ' placeholder="pl. Michelin X Multi"') + mezo('meret', 'Méret', o.meret, ' placeholder="pl. 295/80 R22.5"') + '</div>' +
+    mezoJ('gyartmany', 'Gyártmány, mintázat', o.gyartmany, ' placeholder="pl. Michelin X Multi"', gyakori(mezoErtekek(gumik(), 'gyartmany'))) +
+    mezoJ('meret', 'Méret', o.meret, ' placeholder="pl. 295/80 R22.5"', gyakori(mezoErtekek(gumik(), 'meret'))) +
     '<div class="ket">' + valaszto('evszak', 'Évszak', ['', 'Nyári', 'Téli', 'Négyévszakos'], o.evszak || '') + mezo('dot', 'DOT (gyártási hét/év)', o.dot, ' placeholder="pl. 3824"') + '</div>' +
     mezo('profil', 'Profilmélység (mm)', o.profil !== undefined ? String(o.profil).replace('.', ',') : '', ' inputmode="decimal" placeholder="a legkisebb mért érték"') +
     mezo('megj', 'Megjegyzés', o.megj) +
-    mezo('rogzitette', 'Rögzítette', uj ? (lsGet('fk_nev') || '') : o.rogzitette) +
+    mezoJ('rogzitette', 'Rögzítette', uj ? (lsGet('fk_nev') || '') : o.rogzitette, '', szemelyek()) +
     '<button class="gomb" type="submit">Mentés</button>' +
     (uj ? '' : '<button class="gomb torol" type="button" data-act="naplo-torol" data-tipus="gumi" data-id="' + esc(o.id) + '">Bejegyzés törlése</button>') +
     '</form>');
 }
 
+// egész szám ezres tagolással (100.000) – beviteli mezőkhöz
+function ezres(v) {
+  var d = String(v === undefined || v === null ? '' : v).replace(/[^0-9]/g, '');
+  return d.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+function egesz(v) { var d = String(v === undefined || v === null ? '' : v).replace(/[^0-9]/g, ''); return d === '' ? NaN : Number(d); }
+// a korábban beírt értékek, a leggyakoribb elöl
+function gyakori(ertekek, max) {
+  var c = {}, sorrend = [];
+  ertekek.forEach(function (v) {
+    v = String(v === undefined || v === null ? '' : v).trim();
+    if (!v) return;
+    if (!c[v]) { c[v] = 0; sorrend.push(v); }
+    c[v]++;
+  });
+  return sorrend.sort(function (a, b) { return c[b] - c[a] || a.localeCompare(b, 'hu'); }).slice(0, max || 40);
+}
+function mezoErtekek(lista, mezo) { return lista.map(function (x) { return x[mezo]; }); }
+// személyek: előbb a Sofőrök listája, aztán akiket eddig bárhol beírtak
+function szemelyek() {
+  var aktiv = soforok().filter(function (x) { return x.allapot !== 'Inaktív'; }).map(function (x) { return x.nev; });
+  var tobbi = gyakori([].concat(mezoErtekek(tankolasok(), 'sofor'), mezoErtekek(karok(), 'sofor'), mezoErtekek(hibak(), 'bejelento'),
+    mezoErtekek(tankolasok(), 'rogzitette'), mezoErtekek(karok(), 'rogzitette'), mezoErtekek(gumik(), 'rogzitette'), mezoErtekek(szervizek(), 'rogzitette')));
+  return gyakori(aktiv).concat(tobbi.filter(function (n) { return aktiv.indexOf(n) < 0; }));
+}
+// szövegmező, alatta a leggyakoribb korábbi értékek egy koppintással; a teljes lista a böngésző javaslataiban
+function mezoJ(nev, cimke, ertek, extra, lista) {
+  var id = 'm-' + nev;
+  lista = (lista || []).filter(String);
+  return '<div class="mezo"><label for="' + id + '">' + esc(cimke) + '</label>' +
+    '<input id="' + id + '" name="' + nev + '" value="' + esc(ertek === undefined ? '' : ertek) + '" list="jl-' + nev + '" autocomplete="off"' + (extra || '') + '>' +
+    '<datalist id="jl-' + nev + '">' + lista.map(function (v) { return '<option value="' + esc(v) + '">'; }).join('') + '</datalist>' +
+    (lista.length ? '<div class="javaslat">' + lista.slice(0, 4).map(function (v) {
+      return '<button type="button" data-act="javaslat" data-cel="' + id + '" data-v="' + esc(v) + '">' + esc(v) + '</button>';
+    }).join('') + '</div>' : '') + '</div>';
+}
 function urlapAdat(form) {
   var o = {};
   Array.prototype.forEach.call(form.elements, function (el) { if (el.name) o[el.name] = el.value; });
@@ -1465,6 +1509,11 @@ document.addEventListener('click', function (e) {
     if (!torlesMegerosit(el, 'Biztosan törlöd? Koppints újra')) return;
     return kuld(el, { a: 'naplo_torles', tipus: el.dataset.tipus, id: el.dataset.id });
   }
+  if (act === 'javaslat') {
+    var cm = document.getElementById(el.dataset.cel);
+    if (cm) { cm.value = el.dataset.v; cm.dispatchEvent(new Event('input', { bubbles: true })); }
+    return;
+  }
   if (act === 'segm') {
     var cs = el.closest('[data-segm]');
     el.closest('form').elements[cs.dataset.segm].value = el.dataset.v;
@@ -1528,6 +1577,18 @@ document.addEventListener('click', function (e) {
 });
 
 document.addEventListener('input', function (e) {
+  if (e.target.hasAttribute && e.target.hasAttribute('data-ezres')) {
+    var el = e.target, v = el.value, poz = el.selectionStart === null ? v.length : el.selectionStart;
+    var szamjegyElotte = v.slice(0, poz).replace(/[^0-9]/g, '').length;
+    var uj = ezres(v);
+    if (uj !== v) {
+      el.value = uj;
+      var i = 0, n = 0;
+      while (i < uj.length && n < szamjegyElotte) { if (/[0-9]/.test(uj[i])) n++; i++; }
+      try { el.setSelectionRange(i, i); } catch (e2) {}
+    }
+    return;
+  }
   if (e.target.dataset && e.target.dataset.input === 'kereses') {
     S.kereses = e.target.value;
     // csak a listát rajzolja újra, hogy a billentyűzet nyitva maradjon
@@ -1544,14 +1605,14 @@ document.addEventListener('input', function (e) {
 document.addEventListener('change', function (e) {
   if (e.target.dataset && e.target.dataset.change === 'km-hint') {
     var jh = jarmu(e.target.value), kmM = document.getElementById('m-km');
-    if (kmM) kmM.placeholder = jh && jh.km !== '' && jh.km !== undefined ? 'eddig: ' + km(jh.km) : '';
+    if (kmM) kmM.placeholder = jh && jh.km !== '' && jh.km !== undefined ? 'eddig: ' + ezres(jh.km) : '';
     return;
   }
   if (e.target.dataset && e.target.dataset.change === 'sz-jarmu') {
     S.szForm.hibak = [];
     szHibakRajzol(e.target.value);
     var j = jarmu(e.target.value), kmMezo = document.getElementById('m-km');
-    if (kmMezo) kmMezo.placeholder = j && j.km !== '' && j.km !== undefined ? 'eddig: ' + km(j.km) : '';
+    if (kmMezo) kmMezo.placeholder = j && j.km !== '' && j.km !== undefined ? 'eddig: ' + ezres(j.km) : '';
     return;
   }
   if (e.target.dataset && e.target.dataset.change === 'okm-ujra') {
@@ -1628,7 +1689,7 @@ document.addEventListener('submit', function (e) {
     if (tipus === 'tank') {
       var lit = Number(String(d.liter || '').replace(/\s/g, '').replace(',', '.'));
       if (!(lit > 0)) { toast('Add meg a tankolt litert.', true); return; }
-      var kmUj = Number(String(d.km || '').replace(/\s/g, ''));
+      var kmUj = egesz(d.km);
       var ut = utolsoTank(d.jarmu, d.id);
       if (ut && kmUj < Number(ut.km) && !gomb.dataset.biztos) {
         gomb.dataset.biztos = '1'; gomb.textContent = 'Kevesebb, mint a legutóbbi (' + km(ut.km) + ') – mégis mentem';
@@ -1644,7 +1705,7 @@ document.addEventListener('submit', function (e) {
   }
   if (tipus === 'km') {
     var j = jarmu(d.id);
-    var n = Number(String(d.km).replace(/\s/g, ''));
+    var n = egesz(d.km);
     if (!j || !(n >= 0)) { toast('Add meg a járművet és a km-állást.', true); return; }
     if (j.km !== '' && j.km !== undefined && n < Number(j.km) && !gomb.dataset.biztos) {
       gomb.dataset.biztos = '1'; gomb.textContent = 'Kevesebb, mint az eddigi (' + km(j.km) + ') – mégis mentem';
