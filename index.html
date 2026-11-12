@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0F1418">
+<meta name="theme-color" content="#F2F5FA">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,155 +13,224 @@
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<script>(function(){var t;try{t=localStorage.getItem('fk_tema')}catch(e){}var d=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.setAttribute('data-tema',t==='sotet'||t==='vilagos'?t:(d?'sotet':'vilagos'));})();</script>
 <script src="config.js"></script>
 <style>
-:root{
-  --bg:#0F1418; --card:#182027; --card2:#1F2930; --line:#26323B; --line2:#222D35;
-  --text:#E8EEF2; --muted:#9AA8B3; --dim:#8C9AA5; --soft:#C3CDD4;
-  --acc:#45C2B5; --accText:#0B1714;
-  --ok:#4FBF85; --okT:#6FD49F; --warn:#F2B33D; --warnT:#F5C25E; --bad:#FF7A6E; --badT:#FF9A90;
+:root,html[data-tema="vilagos"]{
+  color-scheme:light;
+  --bg:#F2F5FA; --card:#FFFFFF; --card2:#F5F7FB; --line:#E2E8F0; --line2:#EDF1F6; --line3:#D5DDE8;
+  --text:#0E1B2E; --muted:#566880; --dim:#6B7A90; --soft:#33445C;
+  --acc:#2160E8; --accBg:#2160E8; --accText:#FFFFFF;
+  --ok:#1F9D5A; --okT:#13703F; --okS:#E5F5EC; --okB:#BFE5CF;
+  --warn:#E39A12; --warnT:#8A5300; --warnS:#FFF4DE; --warnB:#F5D59A;
+  --bad:#E5483B; --badT:#B42318; --badS:#FDEDEC; --badB:#F4BDB7;
+  --infoT:#1D4FD8; --infoS:#E9F0FE; --mutedT:#4A5A70; --mutedS:#EEF1F5; --none:#B7C2D0;
+  --tCyS:#E0F4F7; --tCyT:#0E7490; --tBlS:#E9F0FE; --tBlT:#1D4FD8; --tPuS:#F1ECFD; --tPuT:#6D3FD1; --tGrS:#EEF1F5; --tGrT:#475569;
+  --menuBg:rgba(255,255,255,.94); --shadow:0 1px 2px rgba(15,37,87,.05),0 6px 18px rgba(15,37,87,.06); --shadow2:0 14px 36px rgba(15,37,87,.18);
+  --overlay:rgba(14,27,46,.45); --toastBg:#0E1B2E; --toastT:#FFFFFF; --toastHBg:#B42318; --toastHT:#FFFFFF; --jelT:#FFFFFF;
+  --hero:linear-gradient(135deg,#0F2557 0%,#1B4DB1 58%,#2F74F5 100%); --sbBg:#0F2557;
   --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+}
+html[data-tema="sotet"]{
+  color-scheme:dark;
+  --bg:#0A0F1C; --card:#121A2B; --card2:#18223A; --line:#223049; --line2:#1B2740; --line3:#2A3A57;
+  --text:#E7EDF7; --muted:#97A5BC; --dim:#8291AA; --soft:#C2CCDC;
+  --acc:#5B9BFF; --accBg:#2F6FE4; --accText:#FFFFFF;
+  --ok:#4FBF85; --okT:#6FD49F; --okS:rgba(79,191,133,.14); --okB:rgba(79,191,133,.35);
+  --warn:#F2B33D; --warnT:#F5C25E; --warnS:rgba(242,179,61,.13); --warnB:rgba(242,179,61,.4);
+  --bad:#FF7A6E; --badT:#FF9A90; --badS:rgba(255,122,110,.13); --badB:rgba(255,122,110,.45);
+  --infoT:#8DB6FF; --infoS:rgba(91,155,255,.16); --mutedT:#AEB9CC; --mutedS:rgba(140,154,180,.16); --none:#4A5873;
+  --tCyS:rgba(34,184,207,.16); --tCyT:#67D3E6; --tBlS:rgba(91,155,255,.16); --tBlT:#9DBDF2; --tPuS:rgba(190,160,230,.16); --tPuT:#C9B3F0; --tGrS:rgba(200,200,210,.12); --tGrT:#C3CDD4;
+  --menuBg:rgba(14,20,34,.94); --shadow:0 1px 2px rgba(0,0,0,.35); --shadow2:0 14px 40px rgba(0,0,0,.55);
+  --overlay:rgba(3,6,14,.65); --toastBg:#24314A; --toastT:#E7EDF7; --toastHBg:#4A2420; --toastHT:#FFD3CE; --jelT:#1A0E0C;
+  --hero:linear-gradient(135deg,#0E1A3A 0%,#16357A 58%,#2456C4 100%); --sbBg:#0A0F1C;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif;font-size:15px}
 body{min-height:100vh;overscroll-behavior-y:none}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:var(--sat);background:var(--sbBg);z-index:35;pointer-events:none}
 button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 button{cursor:pointer}
 a{color:var(--acc)}
-h1,h2,.gr{font-family:'Space Grotesk',Inter,sans-serif}
+h1,h2,.gr{font-family:'Plus Jakarta Sans',Inter,sans-serif}
 #app{max-width:640px;margin:0 auto;padding:calc(18px + var(--sat)) 18px calc(170px + var(--sab))}
 .fej{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:16px}
-.fej h1{margin:0;font-size:28px;font-weight:700;letter-spacing:-.3px}
+.fej h1{margin:0;font-size:27px;font-weight:800;letter-spacing:-.4px}
 .fej .al{font-size:13px;color:var(--muted);margin-top:2px}
-.kicsi{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.3px}
-.ikongomb{width:44px;height:44px;border-radius:14px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--text);flex-shrink:0;position:relative;text-decoration:none}
+.kicsi{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.3px}
+.ikongomb{width:44px;height:44px;border-radius:14px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--text);flex-shrink:0;position:relative;text-decoration:none;box-shadow:var(--shadow)}
 .ikongomb.acc{color:var(--acc)}
-.jelveny{position:absolute;top:-5px;right:-5px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--bad);color:#1A0E0C;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
-.kartya{background:var(--card);border:1px solid var(--line);border-radius:16px}
+.jelveny{position:absolute;top:-5px;right:-5px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--bad);color:var(--jelT);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
+.kartya{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
 .sav{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;text-decoration:none;color:var(--text);margin-bottom:14px;border:1px solid}
-.sav.bad{background:rgba(255,122,110,.12);border-color:rgba(255,122,110,.35)}
-.sav.warn{background:rgba(242,179,61,.10);border-color:rgba(242,179,61,.35)}
-.sav.ok{background:rgba(79,191,133,.10);border-color:rgba(79,191,133,.3)}
-.sav .ik{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.sav.bad .ik{background:rgba(255,122,110,.18);color:var(--badT)}
-.sav.warn .ik{background:rgba(242,179,61,.18);color:var(--warnT)}
-.sav.ok .ik{background:rgba(79,191,133,.18);color:var(--okT)}
+.sav.bad{background:var(--badS);border-color:var(--badB)}
+.sav.warn{background:var(--warnS);border-color:var(--warnB)}
+.sav.ok{background:var(--okS);border-color:var(--okB)}
+.sav .ik{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--card)}
+.sav.bad .ik{color:var(--badT)} .sav.warn .ik{color:var(--warnT)} .sav.ok .ik{color:var(--okT)}
 .sav .c{font-size:15px;font-weight:600}
 .sav.bad .c{color:var(--badT)} .sav.warn .c{color:var(--warnT)} .sav.ok .c{color:var(--okT)}
 .sav .s{font-size:13px;color:var(--soft)}
 .racs2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .stat{padding:14px;display:flex;flex-direction:column;gap:4px;text-decoration:none;color:var(--text)}
-.stat .n{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:700;line-height:1.1}
+.stat .n{font-family:'Plus Jakarta Sans',sans-serif;font-size:30px;font-weight:800;line-height:1.1}
 .stat .l,.stat .s{font-size:12px;color:var(--muted)}
-.szakasz{display:flex;justify-content:space-between;align-items:baseline;margin:22px 0 10px}
-.szakasz h2{margin:0;font-size:18px;font-weight:600}
+.stat .l{font-weight:600}
+.szakasz{display:flex;justify-content:space-between;align-items:baseline;margin:24px 0 10px}
+.szakasz h2{margin:0;font-size:18px;font-weight:700}
 .szakasz a,.szakasz span{font-size:13px;font-weight:600;text-decoration:none}
 .szakasz span{color:var(--muted);font-weight:500}
 .lista{display:flex;flex-direction:column;overflow:hidden}
 .sor{display:flex;align-items:center;gap:12px;padding:12px 14px;border:0;border-bottom:1px solid var(--line2);background:transparent;text-align:left;width:100%;color:var(--text);text-decoration:none}
 .sor:last-child{border-bottom:0}
+button.sor:hover,a.sor:hover{background:var(--card2)}
 .pont{width:10px;height:10px;border-radius:5px;flex-shrink:0}
-.pont.ok{background:var(--ok)} .pont.warn{background:var(--warn)} .pont.bad{background:var(--bad)} .pont.none{background:#4A5863}
+.pont.ok{background:var(--ok)} .pont.warn{background:var(--warn)} .pont.bad{background:var(--bad)} .pont.none{background:var(--none)}
 .sor .t{display:flex;flex-direction:column;gap:2px;flex-grow:1;min-width:0}
 .sor .t b{font-size:14px;font-weight:600}
 .sor .t span{font-size:12px;color:var(--muted)}
 .pill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;white-space:nowrap}
-.pill.ok{color:var(--okT);background:rgba(79,191,133,.14)} .pill.warn{color:var(--warnT);background:rgba(242,179,61,.14)}
-.pill.bad{color:var(--badT);background:rgba(255,122,110,.14)} .pill.info{color:#6FD6CB;background:rgba(69,194,181,.14)}
-.pill.muted{color:#AEB9C2;background:rgba(140,154,165,.16)}
+.pill.ok{color:var(--okT);background:var(--okS)} .pill.warn{color:var(--warnT);background:var(--warnS)}
+.pill.bad{color:var(--badT);background:var(--badS)} .pill.info{color:var(--infoT);background:var(--infoS)}
+.pill.muted{color:var(--mutedT);background:var(--mutedS)}
 .ures{padding:18px;text-align:center;color:var(--muted);font-size:14px}
-.kereso{display:flex;align-items:center;gap:10px;height:46px;padding:0 14px;border-radius:14px;background:var(--card);border:1px solid var(--line);color:var(--dim);margin-bottom:12px}
+.kereso{display:flex;align-items:center;gap:10px;height:46px;padding:0 14px;border-radius:14px;background:var(--card);border:1px solid var(--line);color:var(--dim);margin-bottom:12px;box-shadow:var(--shadow)}
 .kereso input{flex-grow:1;background:transparent;border:0;outline:0;color:var(--text);font-size:15px;min-width:0}
 .chipek{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .chip{height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:var(--card);color:var(--soft);border:1px solid var(--line)}
-.chip.be{background:var(--acc);color:var(--accText);border-color:var(--acc)}
-.jkartya{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:18px;background:var(--card);border:1px solid var(--line);text-decoration:none;color:var(--text);margin-bottom:10px}
-.jkartya.warn{border-color:rgba(242,179,61,.45)} .jkartya.bad{border-color:rgba(255,122,110,.55)}
+.chip.be{background:var(--accBg);color:var(--accText);border-color:var(--accBg)}
+.jkartya{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:18px;background:var(--card);border:1px solid var(--line);text-decoration:none;color:var(--text);margin-bottom:10px;box-shadow:var(--shadow)}
+.jkartya.warn{border-color:var(--warnB)} .jkartya.bad{border-color:var(--badB)}
 .jk1{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .jk2 b{display:block;font-size:16px;font-weight:600}
 .jk2 span{font-size:12px;color:var(--muted)}
 .jelzok{display:flex;gap:6px;flex-wrap:wrap}
 .jelzo{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:9px;background:var(--card2);font-size:12px;color:var(--soft)}
 .jelzo i{width:7px;height:7px;border-radius:4px;display:inline-block}
-.jelzo i.ok{background:var(--ok)} .jelzo i.warn{background:var(--warn)} .jelzo i.bad{background:var(--bad)} .jelzo i.none{background:#4A5863}
+.jelzo i.ok{background:var(--ok)} .jelzo i.warn{background:var(--warn)} .jelzo i.bad{background:var(--bad)} .jelzo i.none{background:var(--none)}
 .rsz{display:inline-flex;align-items:stretch;border-radius:5px;overflow:hidden;background:#F4F6F8;border:1px solid #C9D1D8;flex-shrink:0}
 .rsz i{width:13px;background:#2F5FB3;color:#fff;font-size:8px;font-weight:700;font-style:normal;display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px}
-.rsz b{padding:3px 8px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:#11161A;letter-spacing:.6px}
+.rsz b{padding:3px 8px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#11161A;letter-spacing:.6px}
 .rsz.nagy i{width:15px;font-size:9px;padding-bottom:3px} .rsz.nagy b{font-size:18px;padding:4px 10px;letter-spacing:.8px}
 .felso{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
 .hos{padding:16px;display:flex;flex-direction:column;gap:12px;margin-bottom:6px}
-.hos .c{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700}
+.hos .c{font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:800}
 .hos .m{font-size:13px;color:var(--muted);margin-top:3px}
 .racs3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .mini{display:flex;flex-direction:column;gap:2px;padding:10px;border-radius:12px;background:var(--card2);border:0;text-align:left;color:var(--text)}
-.mini span{font-size:11px;color:var(--muted)} .mini b{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700}
+.mini span{font-size:11px;color:var(--muted)} .mini b{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800}
 .mini em{font-style:normal;font-size:11px;color:var(--muted)}
 .csempe{text-align:left;display:flex;flex-direction:column;gap:3px;padding:11px 12px;border-radius:14px;background:var(--card);border:1px solid var(--line);color:var(--text);min-height:76px}
 .csempe .l{font-size:12px;color:var(--muted);font-weight:500}
 .csempe .d{font-size:14px;font-weight:600}
 .csempe .r{font-size:12px;font-weight:600}
-.csempe.ok .r{color:var(--okT)} .csempe.warn{border-color:rgba(242,179,61,.45)} .csempe.warn .r{color:var(--warnT)}
-.csempe.bad{border-color:rgba(255,122,110,.55);background:rgba(255,122,110,.08)} .csempe.bad .r{color:var(--badT)}
+.csempe.ok .r{color:var(--okT)} .csempe.warn{border-color:var(--warnB)} .csempe.warn .r{color:var(--warnT)}
+.csempe.bad{border-color:var(--badB);background:var(--badS)} .csempe.bad .r{color:var(--badT)}
 .csempe.nincs{border-style:dashed;background:transparent} .csempe.nincs .d{color:var(--dim);font-weight:500} .csempe.nincs .r{color:var(--acc)}
 .megj{padding:14px;font-size:14px;color:var(--soft);white-space:pre-wrap;margin-top:12px}
 .szegmens{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px;border-radius:14px;background:var(--card);border:1px solid var(--line);margin-bottom:14px}
 .szegmens button{height:38px;border-radius:10px;border:0;font-size:13px;font-weight:600;background:transparent;color:var(--soft)}
-.szegmens button.be{background:var(--acc);color:var(--accText)}
+.szegmens button.be{background:var(--accBg);color:var(--accText)}
 .csop{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin:16px 0 8px}
 .csop.bad{color:var(--badT)} .csop.warn{color:var(--warnT)} .csop.ok{color:var(--muted)}
 .dat{width:46px;height:46px;border-radius:12px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.dat b{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;line-height:1}
+.dat b{font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;font-weight:800;line-height:1}
 .dat span{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-.dat.bad{background:rgba(255,122,110,.16);color:var(--badT)} .dat.warn{background:rgba(242,179,61,.16);color:var(--warnT)} .dat.ok{background:var(--card2);color:var(--soft)}
+.dat.bad{background:var(--badS);color:var(--badT)} .dat.warn{background:var(--warnS);color:var(--warnT)} .dat.ok{background:var(--card2);color:var(--soft)}
 .rel{font-size:12px;font-weight:600;white-space:nowrap}
 .rel.bad{color:var(--badT)} .rel.warn{color:var(--warnT)} .rel.ok{color:var(--muted)}
-.avatar{width:42px;height:42px;border-radius:21px;background:var(--line);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:var(--soft);flex-shrink:0}
+.avatar{width:42px;height:42px;border-radius:21px;background:var(--infoS);display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:var(--infoT);flex-shrink:0}
 .okm2{display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
 @media (min-width:520px){.okm2{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .okm2 .jelzo{justify-content:flex-start}
 .okm2 .jelzo span{flex-grow:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .okm2 .jelzo b{font-weight:600;white-space:nowrap}
 .okm2 .jelzo b.warn{color:var(--warnT)} .okm2 .jelzo b.bad{color:var(--badT)}
+/* színes ikoncsempék */
+.t-cy{background:var(--tCyS);color:var(--tCyT)} .t-bl{background:var(--tBlS);color:var(--tBlT)} .t-pu{background:var(--tPuS);color:var(--tPuT)} .t-gr{background:var(--tGrS);color:var(--tGrT)}
+.t-ok{background:var(--okS);color:var(--okT)} .t-warn{background:var(--warnS);color:var(--warnT)} .t-bad{background:var(--badS);color:var(--badT)}
+/* fejléc-sáv (hero) */
+.hero{position:relative;margin:calc(-18px - var(--sat)) -18px 0;padding:calc(20px + var(--sat)) 20px 64px;background:var(--hero);color:#fff;border-radius:0 0 28px 28px;overflow:hidden}
+.hero::after{content:'';position:absolute;right:-60px;top:-80px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.14),rgba(255,255,255,0) 70%);pointer-events:none}
+.hero .hsor{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;position:relative;z-index:1}
+.hero .kicsi{color:rgba(255,255,255,.75)}
+.hero h1{margin:4px 0 0;font-size:26px;font-weight:800;letter-spacing:-.4px;color:#fff}
+.hero .al{font-size:13px;color:rgba(255,255,255,.78);margin-top:4px;line-height:1.45}
+.hero .hgombok{display:flex;gap:8px}
+.hgomb{width:42px;height:42px;border-radius:13px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);color:#fff;display:flex;align-items:center;justify-content:center;position:relative;text-decoration:none;flex-shrink:0}
+.hgomb .jelveny{border-color:#1B4DB1}
+.hero .sav{position:relative;z-index:1;margin:16px 0 0;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.22);color:#fff;backdrop-filter:blur(4px)}
+.hero .sav .ik{background:rgba(255,255,255,.95)}
+.hero .sav.bad .ik{color:#B42318} .hero .sav.warn .ik{color:#8A5300} .hero .sav.ok .ik{color:#13703F}
+.hero .sav .c{color:#fff} .hero .sav .s{color:rgba(255,255,255,.8)}
+.nyil{color:var(--dim);flex-shrink:0} .hero .nyil{color:rgba(255,255,255,.8)}
+.hero .mezo label{color:rgba(255,255,255,.8)}
+.hero .mezo select{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);color:#fff}
+.hero .mezo select option{color:#0E1B2E;background:#fff}
+.hero .mezo{position:relative;z-index:1;margin:16px 0 0}
+.rajta{position:relative;z-index:2;margin-top:-44px}
+/* Flotta most kártya */
+.fmost{padding:16px;display:flex;flex-direction:column;gap:14px}
+.fmost .ffej{display:flex;justify-content:space-between;align-items:baseline}
+.fmost .ffej h2{margin:0;font-size:17px;font-weight:800}
+.fmost .ffej a{font-size:13px;font-weight:600;text-decoration:none}
+.fmost .stat{background:var(--card2);border:1px solid var(--line2);border-radius:14px;box-shadow:none}
+.allapotsav{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line2);gap:2px}
+.allapotsav i{display:block;height:100%}
+.allapotsav .f{background:var(--ok)} .allapotsav .sz{background:var(--warn)} .allapotsav .a{background:var(--none)}
+.jelmagy{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.jelmagy span{display:inline-flex;align-items:center;gap:6px}
+.jelmagy i{width:8px;height:8px;border-radius:4px;display:inline-block}
+.jelmagy b{color:var(--text);font-weight:700}
+/* idővonal */
+.idovonal .sor{position:relative}
+.idovonal .sor .pont{position:relative;z-index:1;box-shadow:0 0 0 4px var(--card)}
+.idovonal .sor:not(:last-child)::before{content:'';position:absolute;left:18.5px;top:50%;bottom:-50%;width:1px;background:var(--line);z-index:0}
+/* művelet-kártya (sofőr) */
+.muvkartya{padding:12px}
+.muvkartya .racs2{gap:10px}
 /* alsó menü */
-nav.menu{position:fixed;left:0;right:0;bottom:0;background:#141B21;border-top:1px solid var(--line);z-index:20;padding-bottom:var(--sab)}
+nav.menu{position:fixed;left:0;right:0;bottom:0;background:var(--menuBg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);z-index:20;padding-bottom:var(--sab)}
 nav.menu .in{max-width:640px;margin:0 auto;height:72px;display:flex;justify-content:space-around;align-items:flex-start;padding:10px 6px 0}
 nav.menu a{display:flex;flex-direction:column;align-items:center;gap:4px;width:70px;min-height:44px;text-decoration:none;color:var(--dim);font-size:11px;font-weight:500;position:relative}
-nav.menu a.be{color:var(--acc);font-weight:600}
+nav.menu a.be{color:var(--acc);font-weight:700}
 nav.menu a .jelveny{top:-6px;right:10px}
-.fab{position:fixed;right:max(20px,calc(50% - 300px));bottom:calc(96px + var(--sab));width:58px;height:58px;border-radius:20px;background:var(--acc);color:var(--accText);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.45);border:0;z-index:21}
+nav.menu .marka,nav.menu .menualj{display:none}
+.fab{position:fixed;right:max(20px,calc(50% - 300px));bottom:calc(96px + var(--sab));width:58px;height:58px;border-radius:20px;background:var(--accBg);color:var(--accText);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(33,96,232,.38);border:0;z-index:21}
 /* lap (bottom sheet) */
-.hatter{position:fixed;inset:0;background:rgba(4,7,9,.6);z-index:40;display:flex;align-items:flex-end;justify-content:center;animation:be .15s}
-.lap{width:100%;max-width:640px;max-height:92vh;overflow:auto;background:var(--card);border-top:1px solid #2E3B45;border-radius:26px 26px 0 0;padding:10px 20px calc(24px + var(--sab));box-shadow:0 -12px 40px rgba(0,0,0,.5);animation:fel .2s}
+.hatter{position:fixed;inset:0;background:var(--overlay);z-index:40;display:flex;align-items:flex-end;justify-content:center;animation:be .15s}
+.lap{width:100%;max-width:640px;max-height:92vh;overflow:auto;background:var(--card);border-top:1px solid var(--line);border-radius:26px 26px 0 0;padding:10px 20px calc(24px + var(--sab));box-shadow:var(--shadow2);animation:fel .2s}
 @keyframes be{from{opacity:0}} @keyframes fel{from{transform:translateY(40px)}}
-.fogo{width:40px;height:5px;border-radius:3px;background:#3A4852;margin:0 auto 12px}
+.fogo{width:40px;height:5px;border-radius:3px;background:var(--line3);margin:0 auto 12px}
 .lapfej{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
-.lapfej h2{margin:0;font-size:21px;font-weight:700}
+.lapfej h2{margin:0;font-size:21px;font-weight:800}
 .mezo{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
 .mezo label,.mezo .lbl{font-size:12px;color:var(--muted);font-weight:600}
-.mezo input,.mezo select,.mezo textarea{height:46px;padding:0 12px;border-radius:12px;background:var(--card2);border:1px solid #2E3B45;color:var(--text);font-size:16px;outline:0;width:100%}
+.mezo input,.mezo select,.mezo textarea{height:46px;padding:0 12px;border-radius:12px;background:var(--card2);border:1px solid var(--line3);color:var(--text);font-size:16px;outline:0;width:100%}
 .mezo textarea{height:80px;padding:10px 12px;resize:vertical}
-.mezo input:focus,.mezo select:focus,.mezo textarea:focus{border-color:var(--acc)}
+.mezo input:focus,.mezo select:focus,.mezo textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--infoS)}
 .mezo .tipp{font-size:12px;color:var(--dim)}
 .ket{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.gomb{height:50px;border-radius:14px;border:0;background:var(--acc);color:var(--accText);font-weight:700;font-size:16px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
+.gomb{height:50px;border-radius:14px;border:0;background:var(--accBg);color:var(--accText);font-weight:700;font-size:16px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
 .gomb:disabled{opacity:.6}
-.gomb.masod{background:var(--card2);color:var(--text);border:1px solid #2E3B45}
-.gomb.torol{background:transparent;color:var(--badT);border:1px solid rgba(255,122,110,.4);margin-top:10px}
-.porog{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(11,23,20,.3);border-top-color:var(--accText);animation:forog .7s linear infinite}
+.gomb.masod{background:var(--card2);color:var(--text);border:1px solid var(--line3)}
+.gomb.torol{background:transparent;color:var(--badT);border:1px solid var(--badB);margin-top:10px}
+.porog{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:var(--accText);animation:forog .7s linear infinite}
 @keyframes forog{to{transform:rotate(360deg)}}
 .muvracs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.muv{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 6px;border-radius:16px;background:var(--card2);border:1px solid #2E3B45;color:var(--text);font-size:13px;font-weight:600;text-align:center}
+.muv{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 6px;border-radius:16px;background:var(--card2);border:1px solid var(--line2);color:var(--text);font-size:13px;font-weight:600;text-align:center}
 .muv .ik{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center}
 .muv:disabled{opacity:.42}
 .muv small{font-size:11px;color:var(--muted);font-weight:500;margin-top:-4px}
-#toast{position:fixed;left:50%;bottom:calc(170px + var(--sab));transform:translateX(-50%);background:#24313A;color:var(--text);padding:12px 18px;border-radius:14px;font-size:14px;font-weight:600;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .2s;max-width:88vw;text-align:center}
+#toast{position:fixed;left:50%;bottom:calc(170px + var(--sab));transform:translateX(-50%);background:var(--toastBg);color:var(--toastT);padding:12px 18px;border-radius:14px;font-size:14px;font-weight:600;z-index:60;box-shadow:var(--shadow2);opacity:0;pointer-events:none;transition:opacity .2s;max-width:88vw;text-align:center}
 #toast.lat{opacity:1}
-#toast.hiba{background:#4A2420;color:#FFD3CE}
-.offline{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--warnT);background:rgba(242,179,61,.1);border:1px solid rgba(242,179,61,.3);border-radius:10px;padding:7px 10px;margin-bottom:12px}
+#toast.hiba{background:var(--toastHBg);color:var(--toastHT)}
+.offline{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--warnT);background:var(--warnS);border:1px solid var(--warnB);border-radius:10px;padding:7px 10px;margin-bottom:12px}
+.hero + .offline,.offline + .hero{margin-top:12px}
 .belepes{min-height:calc(100vh - 140px);display:flex;flex-direction:column;justify-content:center;gap:16px;max-width:380px;margin:0 auto}
-.logo{width:72px;height:72px;border-radius:22px;background:var(--acc);display:flex;align-items:center;justify-content:center;color:var(--accText)}
-.belepes h1{margin:0;font-size:30px}
+.logo{width:72px;height:72px;border-radius:22px;background:var(--hero);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 10px 26px rgba(27,77,177,.35)}
+.belepes h1{margin:0;font-size:30px;font-weight:800}
 .belepes p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
 .hibauz{color:var(--badT);font-size:14px;min-height:20px}
 .infok{padding:14px;font-size:14px;line-height:1.55;color:var(--soft)}
@@ -173,12 +242,12 @@ nav.menu a .jelveny{top:-6px;right:10px}
 .kisgomb{height:34px;padding:0 12px;border-radius:10px;background:var(--card);border:1px solid var(--line);color:var(--acc);font-size:13px;font-weight:600;white-space:nowrap}
 .szakasz .kisgomb{font-weight:600}
 .tovabb{width:100%;height:44px;border:0;border-top:1px solid var(--line2);background:transparent;color:var(--acc);font-size:13px;font-weight:600}
-.pipasor{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:12px;background:var(--card2);border:1px solid #2E3B45;margin-bottom:8px;font-size:14px;cursor:pointer}
+.pipasor{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:12px;background:var(--card2);border:1px solid var(--line3);margin-bottom:8px;font-size:14px;cursor:pointer}
 .pipasor input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--acc);flex-shrink:0}
 .pipasor small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
-.esedek{padding:10px 12px;border-radius:12px;background:var(--card2);border:1px solid #2E3B45;margin-bottom:8px}
+.esedek{padding:10px 12px;border-radius:12px;background:var(--card2);border:1px solid var(--line3);margin-bottom:8px}
 .esedek .lbl{font-size:13px;font-weight:600;margin-bottom:8px}
-.esedek input{height:42px;padding:0 10px;border-radius:10px;background:var(--bg);border:1px solid #2E3B45;color:var(--text);font-size:15px;outline:0;width:100%}
+.esedek input{height:42px;padding:0 10px;border-radius:10px;background:var(--card);border:1px solid var(--line3);color:var(--text);font-size:15px;outline:0;width:100%}
 .esedek input:focus{border-color:var(--acc)}
 .alcim{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
 .lap .szegmens{margin-bottom:12px}
@@ -187,12 +256,12 @@ nav.menu a .jelveny{top:-6px;right:10px}
 .fulek{display:flex;gap:6px;overflow-x:auto;margin:14px -18px 4px;padding:0 18px 4px;scrollbar-width:none}
 .fulek::-webkit-scrollbar{display:none}
 .fulek button{height:38px;padding:0 14px;border-radius:11px;font-size:13px;font-weight:600;white-space:nowrap;flex-shrink:0;background:var(--card);color:var(--soft);border:1px solid var(--line)}
-.fulek button.be{background:var(--acc);color:var(--accText);border-color:var(--acc)}
+.fulek button.be{background:var(--accBg);color:var(--accText);border-color:var(--accBg)}
 .fogy{padding:14px;display:flex;flex-direction:column;gap:12px}
 .fogy .fo{display:flex;align-items:baseline;gap:8px}
-.fogy .fo b{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:700}
+.fogy .fo b{font-family:'Plus Jakarta Sans',sans-serif;font-size:30px;font-weight:800}
 .fogy .fo span{color:var(--muted);font-size:13px}
-.figyelm{font-size:13px;color:var(--warnT);background:rgba(242,179,61,.1);border:1px solid rgba(242,179,61,.3);border-radius:10px;padding:8px 10px}
+.figyelm{font-size:13px;color:var(--warnT);background:var(--warnS);border:1px solid var(--warnB);border-radius:10px;padding:8px 10px}
 .havi{display:flex;flex-direction:column;gap:6px}
 .havi .h{display:grid;grid-template-columns:72px 1fr auto;gap:10px;align-items:center;font-size:12px;color:var(--soft)}
 .havi .h i{display:block;height:8px;border-radius:4px;background:var(--acc);opacity:.75}
@@ -203,8 +272,32 @@ nav.menu a .jelveny{top:-6px;right:10px}
 .gumik .g b{font-weight:600}
 .gumik .g span{color:var(--muted);text-align:right}
 .javaslat{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
-.javaslat button{height:32px;padding:0 11px;border-radius:999px;background:var(--card2);border:1px solid #2E3B45;color:var(--soft);font-size:13px;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.javaslat button:active{background:var(--acc);color:var(--accText)}
+.javaslat button{height:32px;padding:0 11px;border-radius:999px;background:var(--card2);border:1px solid var(--line3);color:var(--soft);font-size:13px;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.javaslat button:active{background:var(--accBg);color:var(--accText)}
+.temaszeg{margin:0}
+/* táblagép / asztali */
+@media (min-width:700px){
+  .hero{margin:0 0 0;border-radius:24px;padding:26px 28px 70px}
+  .hero h1{font-size:30px}
+  .rajta{margin-top:-48px;padding:0 16px}
+}
+@media (min-width:1100px){
+  body.van-menu #app{max-width:1100px;margin:0 0 0 248px;padding:28px 40px 120px}
+  body.van-menu nav.menu{top:0;right:auto;width:232px;border-top:0;border-right:1px solid var(--line);background:var(--card);padding:0}
+  body.van-menu nav.menu .in{height:100%;max-width:none;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:4px;padding:22px 14px}
+  body.van-menu nav.menu .marka{display:flex;align-items:center;gap:10px;padding:0 8px 18px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:17px;color:var(--text)}
+  body.van-menu nav.menu .marka i{width:36px;height:36px;border-radius:11px;background:var(--hero);display:flex;align-items:center;justify-content:center;color:#fff}
+  body.van-menu nav.menu .marka small{display:block;font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:var(--muted)}
+  body.van-menu nav.menu a{flex-direction:row;width:auto;min-height:42px;gap:12px;padding:0 12px;border-radius:12px;font-size:14px;color:var(--soft)}
+  body.van-menu nav.menu a.be{background:var(--infoS);color:var(--acc)}
+  body.van-menu nav.menu a:hover:not(.be){background:var(--card2)}
+  body.van-menu nav.menu a .jelveny{position:static;margin-left:auto;border:0}
+  body.van-menu nav.menu .menualj{display:block;margin-top:auto;padding:12px 4px 0;border-top:1px solid var(--line2)}
+  body.van-menu nav.menu .menualj .kicsi{display:block;margin:0 6px 8px}
+  body.van-menu .fab{right:40px;bottom:40px}
+  body.van-menu #toast{bottom:40px}
+  .ketoszlop{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 24px;align-items:start}
+}
 </style>
 </head>
 <body>
@@ -216,7 +309,7 @@ nav.menu a .jelveny{top:-6px;right:10px}
 (function () {
 'use strict';
 
-var VERZIO = '0.7.3';
+var VERZIO = '0.8.0';
 var API = (window.FLOTTA_API || '').trim();
 var LS = { kod: 'fk_kod', ceg: 'fk_ceg', adat: 'fk_adat', szerep: 'fk_szerep', sid: 'fk_sid', pin: 'fk_pin', busz: 'fk_busz', rkod: 'fk_rkod' };
 
@@ -245,6 +338,27 @@ function hitel() { return sofor_e() ? { sofor: S.sid, pin: S.pin } : { kod: S.ko
 function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 function lsSet(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
 
+/* ───── téma: auto (a készülék beállítása) | vilagos | sotet ───── */
+var SOTET_MQ = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+function temaBeall() { var t = lsGet('fk_tema'); return t === 'vilagos' || t === 'sotet' ? t : 'auto'; }
+function temaAktiv() { var t = temaBeall(); return t !== 'auto' ? t : (SOTET_MQ && SOTET_MQ.matches ? 'sotet' : 'vilagos'); }
+function temaAlkalmaz() {
+  var t = temaAktiv();
+  document.documentElement.setAttribute('data-tema', t);
+  var m = document.querySelector('meta[name=theme-color]');
+  if (m) m.setAttribute('content', t === 'sotet' ? '#0A0F1C' : '#F2F5FA');
+}
+function temaValt(v) { lsSet('fk_tema', v === 'auto' ? null : v); temaAlkalmaz(); }
+if (SOTET_MQ) { var mqF = function () { if (temaBeall() === 'auto') { temaAlkalmaz(); rajzol(); } }; if (SOTET_MQ.addEventListener) SOTET_MQ.addEventListener('change', mqF); else if (SOTET_MQ.addListener) SOTET_MQ.addListener(mqF); }
+temaAlkalmaz();
+function temaSzegmens(rovid) {
+  var t = temaBeall();
+  return '<div class="szegmens temaszeg" role="group" aria-label="Megjelenés">' + [['auto', rovid ? 'Auto' : 'Automatikus'], ['vilagos', 'Világos'], ['sotet', 'Sötét']].map(function (x) {
+    return '<button type="button" class="' + (t === x[0] ? 'be' : '') + '" aria-pressed="' + (t === x[0]) + '" data-act="tema" data-v="' + x[0] + '">' + x[1] + '</button>';
+  }).join('') + '</div>';
+}
+function koszones() { var o = new Date().getHours(); return o < 9 ? 'Jó reggelt' : o < 18 ? 'Jó napot' : 'Jó estét'; }
+
 /* ───── ikonok ───── */
 var IK = {
   attek: '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
@@ -254,7 +368,7 @@ var IK = {
   menu: '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
   plusz: '<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
   vissza: '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
-  jobbra: '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9AA8B3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+  jobbra: '<svg class="nyil" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
   ceruza: '<svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
   x: '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
   harom: '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
@@ -268,6 +382,8 @@ var IK = {
   pajzs: '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 7v5c0 5 3.8 8.5 9 9 5.2-.5 9-4 9-9V7z"/><path d="M12 8v5M12 16h.01"/></svg>',
   frissit: '<svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/></svg>',
   gumi: '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M12 3v5.5M12 15.5V21M3 12h5.5M15.5 12H21"/></svg>',
+  nap: '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  hold: '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
   felho: '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l20 20M5.8 5.8A7 7 0 0 0 6 19h11a5 5 0 0 0 2.3-.6M9.5 4.6A7 7 0 0 1 18 9a5 5 0 0 1 3.8 6.6"/></svg>'
 };
 
@@ -557,11 +673,13 @@ function rajzol(belepUzenet) {
     app.innerHTML = '<div class="belepes"><h1>Flottakezelő</h1><p>Hiányzik a szerver címe. A <b>config.js</b> fájlba kell beírni az Apps Script webalkalmazás …/exec linkjét.</p></div>';
     return;
   }
+  var off = S.offline ? '<div class="offline">' + IK.felho + 'Nincs kapcsolat – a legutóbb letöltött adatokat látod.</div>' : '';
+  function tesz(html) { return html.indexOf('<!--OFF-->') >= 0 ? html.replace('<!--OFF-->', off) : off + html; }
+  document.body.classList.toggle('van-menu', belepve() && !sofor_e());
   if (!belepve()) { menuHely.innerHTML = ''; app.innerHTML = nezetBelepes(belepUzenet); return; }
   if (sofor_e()) {
     menuHely.innerHTML = '';
-    app.innerHTML = (S.offline ? '<div class="offline">' + IK.felho + 'Nincs kapcsolat – a legutóbb letöltött adatokat látod.</div>' : '') +
-      (S.A && S.A.szerep === 'sofor' ? nezetSoforFo() : '<div class="ures" style="padding-top:120px">Adatok betöltése…</div>');
+    app.innerHTML = tesz(S.A && S.A.szerep === 'sofor' ? nezetSoforFo() : '<div class="ures" style="padding-top:120px">Adatok betöltése…</div>');
     return;
   }
   var u = utvonal();
@@ -574,7 +692,7 @@ function rajzol(belepUzenet) {
   else if (u.nev === 'emlek') html = nezetEmlek();
   else if (u.nev === 'tobb') html = nezetTobb();
   else html = nezetAttekintes();
-  app.innerHTML = (S.offline ? '<div class="offline">' + IK.felho + 'Nincs kapcsolat – a legutóbb letöltött adatokat látod.</div>' : '') + html;
+  app.innerHTML = tesz(html);
   menuHely.innerHTML = menuHtml(u.nev);
 }
 
@@ -586,11 +704,13 @@ function menuHtml(akt) {
   }
   return '<button type="button" class="fab" data-act="fab" aria-label="Új bejegyzés">' + IK.plusz + '</button>' +
     '<nav class="menu" aria-label="Fő menü"><div class="in">' +
+    '<div class="marka"><i>' + IK.busz + '</i><span>Flottakezelő<small>' + esc((S.A && S.A.ceg) || '') + '</small></span></div>' +
     a('attekintes', '#/', IK.attek, 'Áttekintés') +
     a('jarmuvek', '#/jarmuvek', IK.busz, 'Járművek') +
     a('emlek', '#/emlek', IK.csengo, 'Emlékeztetők', lejart ? '<span class="jelveny">' + lejart + '</span>' : '') +
     a('soforok', '#/soforok', IK.ember, 'Sofőrök') +
     a('tobb', '#/tobb', IK.menu, 'Több') +
+    '<div class="menualj"><span class="kicsi">Megjelenés</span>' + temaSzegmens(true) + '</div>' +
     '</div></nav>';
 }
 
@@ -638,34 +758,37 @@ function nezetSoforFo() {
   var js = jarmuvek();
   if (!jarmu(S.busz) && js.length) { S.busz = js[0].id; lsSet(LS.busz, S.busz); }
   var j = jarmu(S.busz);
-  var h = '<div class="fej"><div><div class="kicsi">' + esc(A.ceg || 'Flotta') + '</div><h1>Szia, ' + esc(String(en.nev || '').split(' ').slice(-1)[0] || en.nev) + '!</h1>' +
+  var tema = temaAktiv();
+  var h = '<div class="hero"><div class="hsor"><div><div class="kicsi">' + esc(A.ceg || 'Flotta') + '</div><h1>Szia, ' + esc(String(en.nev || '').split(' ').slice(-1)[0] || en.nev) + '!</h1>' +
     '<div class="al">' + ma.getFullYear() + '. ' + HONAP[ma.getMonth()] + ' ' + ma.getDate() + '., ' + NAP[ma.getDay()] + '</div></div>' +
-    '<button type="button" class="ikongomb" data-act="s-frissit" aria-label="Frissítés">' + IK.frissit + '</button></div>';
-  if (!js.length) return h + '<div class="kartya ures">Még nincs busz a rendszerben. Szólj az irodának.</div>' + soforLab();
+    '<div class="hgombok"><button type="button" class="hgomb" data-act="tema" data-v="' + (tema === 'sotet' ? 'vilagos' : 'sotet') + '" aria-label="' + (tema === 'sotet' ? 'Világos mód' : 'Sötét mód') + '">' + (tema === 'sotet' ? IK.nap : IK.hold) + '</button>' +
+    '<button type="button" class="hgomb" data-act="s-frissit" aria-label="Frissítés">' + IK.frissit + '</button></div></div>';
+  if (!js.length) return h + '<!--OFF--></div><div class="kartya ures" style="margin-top:16px">Még nincs busz a rendszerben. Szólj az irodának.</div>' + soforLab();
   h += '<div class="mezo"><label for="s-busz">Melyik busszal vagy?</label><select id="s-busz" data-change="s-busz" style="height:56px;font-size:18px;font-weight:600">' +
-    js.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === S.busz ? ' selected' : '') + '>' + esc(x.rendszam + (x.tipus ? ' · ' + x.tipus : '')) + '</option>'; }).join('') + '</select></div>';
+    js.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === S.busz ? ' selected' : '') + '>' + esc(x.rendszam + (x.tipus ? ' · ' + x.tipus : '')) + '</option>'; }).join('') + '</select></div><!--OFF--></div>';
   function g(act, ik, szin, cim, extra, al) {
-    return '<button type="button" class="muv" style="padding:20px 8px;font-size:15px" data-act="' + act + '" data-jarmu="' + esc(j.id) + '" data-id="' + esc(j.id) + '"' + (extra || '') + '><span class="ik" style="width:52px;height:52px;' + szin + '">' + ik + '</span>' + cim + (al || '') + '</button>';
+    return '<button type="button" class="muv" style="padding:20px 8px;font-size:15px" data-act="' + act + '" data-jarmu="' + esc(j.id) + '" data-id="' + esc(j.id) + '"' + (extra || '') + '><span class="ik ' + szin + '" style="width:52px;height:52px">' + ik + '</span>' + cim + (al || '') + '</button>';
   }
   var kmMa = j.kmDatum === isoMa();
-  h += '<div class="racs2" style="margin-bottom:6px">' +
-    g('tank-uj', IK.kut, 'background:rgba(69,194,181,.16);color:#6FD6CB', 'Tankolás') +
-    g('hiba-uj', IK.harom, 'background:rgba(242,179,61,.16);color:#F5C25E', 'Hiba bejelentése') +
-    g('km', IK.ora, 'background:rgba(79,191,133,.16);color:#6FD49F', 'Km-állás', '',
+  h += '<div class="rajta"><div class="kartya muvkartya"><div class="racs2">' +
+    g('tank-uj', IK.kut, 't-cy', 'Tankolás') +
+    g('hiba-uj', IK.harom, 't-warn', 'Hiba bejelentése') +
+    g('km', IK.ora, 't-ok', 'Km-állás', '',
       kmMa ? '<small style="color:var(--okT)">mai km-állás megvan</small>' : '<small style="color:var(--warnT)">nap végén add meg</small>') +
-    g('kar-uj', IK.pajzs, 'background:rgba(255,122,110,.14);color:#FF9A90', 'Kár / baleset') + '</div>';
+    g('kar-uj', IK.pajzs, 't-bad', 'Kár / baleset') + '</div></div></div>';
 
-  // a busz állapota
+  // idővonal: okmányok és szerviz-esedékességek időrendben (a legközelebbi felül)
   var okm = rendezettOkm(okmTulajnal('Jármű', j.id));
-  var es = aktivEsedek(j.id).map(function (y) { return { y: y, a: esedekAll(y.e, j) }; }).sort(function (x, y) { return x.a.rend - y.a.rend; });
+  var es = aktivEsedek(j.id).map(function (y) { return { y: y, a: esedekAll(y.e, j) }; });
   var ny = nyitottHibak(j.id);
-  h += '<div class="szakasz"><h2>' + esc(j.rendszam) + ' állapota</h2><span>' + (j.km !== '' && j.km !== undefined ? km(j.km) + ' km' : '') + '</span></div>';
-  var sorok = okm.map(function (x) {
-    return '<div class="sor"><span class="pont ' + x.a.k + '"></span><span class="t"><b>' + esc(x.o.tipus === 'Egyéb' && x.o.megj ? x.o.megj : x.o.tipus) + '</b><span>' + esc(x.a.ism ? 'határidő ' + fmtD(x.o.lejarat) : fmtD(x.o.lejarat)) + '</span></span><span class="pill ' + (x.a.k === 'none' ? 'muted' : x.a.k) + '">' + esc(x.a.rel) + '</span></div>';
+  h += '<div class="szakasz"><h2>Idővonal</h2><span>' + esc(j.rendszam) + (j.km !== '' && j.km !== undefined ? ' · ' + km(j.km) + ' km' : '') + '</span></div>';
+  var tv = okm.map(function (x) {
+    return { rend: x.a.d === null ? 1e6 : x.a.d, html: '<div class="sor"><span class="pont ' + x.a.k + '"></span><span class="t"><b>' + esc(x.o.tipus === 'Egyéb' && x.o.megj ? x.o.megj : x.o.tipus) + '</b><span>' + esc(x.a.ism ? 'határidő ' + fmtD(x.o.lejarat) : fmtD(x.o.lejarat)) + '</span></span><span class="pill ' + (x.a.k === 'none' ? 'muted' : x.a.k) + '">' + esc(x.a.rel) + '</span></div>' };
   }).concat(es.map(function (x) {
-    return '<div class="sor"><span class="pont ' + x.a.k + '"></span><span class="t"><b>' + esc(x.y.e.tetel) + ' (szerviz)</b><span>' + esc([x.y.e.km !== '' ? km(x.y.e.km) + ' km' : '', x.y.e.datum ? fmtD(x.y.e.datum) : ''].filter(String).join(' / ')) + '</span></span><span class="pill ' + (x.a.k === 'none' ? 'muted' : x.a.k) + '">' + esc(x.a.rel) + '</span></div>';
+    return { rend: x.a.rend, html: '<div class="sor"><span class="pont ' + x.a.k + '"></span><span class="t"><b>' + esc(x.y.e.tetel) + ' (szerviz)</b><span>' + esc([x.y.e.km !== '' ? km(x.y.e.km) + ' km' : '', x.y.e.datum ? fmtD(x.y.e.datum) : ''].filter(String).join(' / ')) + '</span></span><span class="pill ' + (x.a.k === 'none' ? 'muted' : x.a.k) + '">' + esc(x.a.rel) + '</span></div>' };
   }));
-  h += sorok.length ? '<div class="kartya lista">' + sorok.join('') + '</div>' : '<div class="kartya ures">Nincs rögzített lejárat ennél a busznál.</div>';
+  tv.sort(function (x, y) { return x.rend - y.rend; });
+  h += tv.length ? '<div class="kartya lista idovonal">' + tv.map(function (x) { return x.html; }).join('') + '</div>' : '<div class="kartya ures">Nincs rögzített lejárat ennél a busznál.</div>';
   h += '<div class="szakasz"><h2>Nyitott hibák</h2><span>' + ny.length + ' db</span></div>';
   h += ny.length ? '<div class="kartya lista">' + ny.map(function (x) {
     var k = hibaK(x), sajat = x.bejelento === en.nev;
@@ -716,30 +839,42 @@ function nezetAttekintes() {
   nyitott.sort(function (a, b) { return (RS[a.sulyossag] || 1) - (RS[b.sulyossag] || 1) || String(b.datum).localeCompare(String(a.datum)); });
   var surgosHiba = nyitott.filter(function (h) { return h.sulyossag === 'Sürgős'; }).length;
 
-  var h = '<div class="fej"><div><div class="kicsi">' + esc(A.ceg || 'Flotta') + ' · flotta</div><h1>Áttekintés</h1>' +
-    '<div class="al">' + ma.getFullYear() + '. ' + HONAP[ma.getMonth()] + ' ' + ma.getDate() + '., ' + NAP[ma.getDay()] + '</div></div>' +
-    '<a class="ikongomb" href="#/emlek" aria-label="Emlékeztetők">' + IK.csengo + (bad.length ? '<span class="jelveny">' + bad.length + '</span>' : '') + '</a></div>';
-
+  var all = js.length - forg - szerv;
+  var datum = ma.getFullYear() + '. ' + HONAP[ma.getMonth()] + ' ' + ma.getDate() + '., ' + NAP[ma.getDay()];
+  var mondat = bad.length ? bad.length + ' tétel lejárt' + (warn.length ? ', ' + warn.length + ' hamarosan esedékes.' : '.') :
+    warn.length ? warn.length + ' tétel hamarosan esedékes, lejárt nincs.' : js.length ? 'Nincs lejárt vagy közeli határidő.' : 'Kezdjük a járművek felvételével.';
+  var h = '<div class="hero"><div class="hsor"><div><div class="kicsi">' + esc(A.ceg || 'Flotta') + ' · Áttekintés</div><h1>' + koszones() + '!</h1>' +
+    '<div class="al">' + esc(mondat) + '<br>' + datum + '</div></div>' +
+    '<div class="hgombok"><a class="hgomb" href="#/emlek" aria-label="Emlékeztetők">' + IK.csengo + (bad.length ? '<span class="jelveny">' + bad.length + '</span>' : '') + '</a></div></div>';
   if (bad.length) h += '<a class="sav bad" href="#/emlek"><span class="ik">' + IK.harom + '</span><span style="flex-grow:1"><div class="c">' + bad.length + ' lejárt tétel</div><div class="s">' + (warn.length ? 'és ' + warn.length + ' hamarosan esedékes' : 'minél előbb intézni kell') + '</div></span>' + IK.jobbra + '</a>';
   else if (warn.length) h += '<a class="sav warn" href="#/emlek"><span class="ik">' + IK.csengo + '</span><span style="flex-grow:1"><div class="c">' + warn.length + ' hamarosan esedékes</div><div class="s">nincs lejárt tétel</div></span>' + IK.jobbra + '</a>';
   else h += '<div class="sav ok"><span class="ik">' + IK.pipa + '</span><span style="flex-grow:1"><div class="c">Minden rendben</div><div class="s">' + (tl.length ? 'nincs lejárt vagy közeli határidő' : 'még nincs rögzített lejárat') + '</div></span></div>';
+  h += '<!--OFF--></div>';
 
-  h += '<div class="racs2 stats">' +
-    '<a class="kartya stat" href="#/jarmuvek"><span class="l">Járművek</span><span class="n">' + js.length + '</span><span class="s">' + forg + ' forgalomban · ' + szerv + ' szervizben</span></a>' +
-    '<button type="button" class="kartya stat" style="text-align:left" data-act="gorget" data-cel="hibak"><span class="l">Nyitott hibák</span><span class="n" style="color:' + (surgosHiba ? 'var(--bad)' : nyitott.length ? 'var(--warn)' : 'var(--text)') + '">' + nyitott.length + '</span><span class="s">' + (surgosHiba ? 'ebből ' + surgosHiba + ' sürgős' : nyitott.length ? 'nincs köztük sürgős' : 'nincs bejelentett hiba') + '</span></button>' +
-    '<a class="kartya stat" href="#/emlek"><span class="l">Lejárt</span><span class="n" style="color:' + (bad.length ? 'var(--bad)' : 'var(--text)') + '">' + bad.length + '</span><span class="s">okmány, letöltés, szerviz</span></a>' +
-    '<a class="kartya stat" href="#/emlek"><span class="l">Hamarosan</span><span class="n" style="color:' + (warn.length ? 'var(--warn)' : 'var(--text)') + '">' + warn.length + '</span><span class="s">a figyelmeztetési időn belül</span></a>' +
+  function szel(n) { return js.length ? (n / js.length * 100).toFixed(1) + '%' : '0'; }
+  h += '<div class="rajta"><section class="kartya fmost"><div class="ffej"><h2>Flotta most</h2><a href="#/emlek">Emlékeztetők</a></div>' +
+    '<div class="racs2 stats">' +
+    '<a class="stat" href="#/jarmuvek"><span class="l">Járművek</span><span class="n">' + js.length + '</span><span class="s">' + forg + ' forgalomban · ' + szerv + ' szervizben</span></a>' +
+    '<button type="button" class="stat" style="text-align:left" data-act="gorget" data-cel="hibak"><span class="l">Nyitott hibák</span><span class="n" style="color:' + (surgosHiba ? 'var(--badT)' : nyitott.length ? 'var(--warnT)' : 'var(--text)') + '">' + nyitott.length + '</span><span class="s">' + (surgosHiba ? 'ebből ' + surgosHiba + ' sürgős' : nyitott.length ? 'nincs köztük sürgős' : 'nincs bejelentett hiba') + '</span></button>' +
+    '<a class="stat" href="#/emlek"><span class="l">Lejárt</span><span class="n" style="color:' + (bad.length ? 'var(--badT)' : 'var(--text)') + '">' + bad.length + '</span><span class="s">okmány, letöltés, szerviz</span></a>' +
+    '<a class="stat" href="#/emlek"><span class="l">Hamarosan</span><span class="n" style="color:' + (warn.length ? 'var(--warnT)' : 'var(--text)') + '">' + warn.length + '</span><span class="s">a figyelmeztetési időn belül</span></a>' +
     '</div>';
+  if (js.length) h += '<div class="allapotsav" role="img" aria-label="' + forg + ' forgalomban, ' + szerv + ' szervizben, ' + all + ' áll">' +
+    (forg ? '<i class="f" style="width:' + szel(forg) + '"></i>' : '') + (szerv ? '<i class="sz" style="width:' + szel(szerv) + '"></i>' : '') + (all ? '<i class="a" style="width:' + szel(all) + '"></i>' : '') + '</div>' +
+    '<div class="jelmagy"><span><i style="background:var(--ok)"></i>Forgalomban <b>' + forg + '</b></span><span><i style="background:var(--warn)"></i>Szervizben <b>' + szerv + '</b></span><span><i style="background:var(--none)"></i>Áll <b>' + all + '</b></span></div>';
+  h += '</section></div>';
 
   var surgos = bad.concat(warn).slice(0, 6);
-  h += '<div class="szakasz"><h2>Sürgős teendők</h2><a href="#/emlek">Mind</a></div>';
+  h += '<div class="' + (nyitott.length ? 'ketoszlop' : '') + '"><div><div class="szakasz"><h2>Sürgős teendők</h2><a href="#/emlek">Mind</a></div>';
   if (!surgos.length) h += '<div class="kartya ures">Nincs sürgős teendő.</div>';
   else h += '<div class="kartya lista">' + surgos.map(sorTeendo).join('') + '</div>';
+  h += '</div><div>';
 
   if (nyitott.length) {
     h += '<div class="szakasz" id="hibak"><h2>Nyitott hibák</h2><span>' + nyitott.length + ' db</span></div><div class="kartya lista">' +
       nyitott.slice(0, 8).map(function (x) { return sorHiba(x, true); }).join('') + '</div>';
   }
+  h += '</div></div>';
 
   var nyk = karok().filter(function (x) { return x.allapot !== 'Lezárva' && jarmu(x.jarmu); })
     .sort(function (a, b) { return String(b.datum).localeCompare(String(a.datum)); });
@@ -1050,7 +1185,9 @@ function nezetEmlek() {
 function nezetTobb() {
   var A = S.A, n = A.naptar || {};
   var h = '<div class="fej"><div><h1>Több</h1><div class="al">' + esc(A.ceg || 'Flotta') + '</div></div></div>';
-  h += '<div class="szakasz" style="margin-top:4px"><h2>Emlékeztetők a naptárban</h2></div>';
+  h += '<div class="szakasz" style="margin-top:4px"><h2>Megjelenés</h2></div><div class="kartya infok">' + temaSzegmens() +
+    '<div style="font-size:12px;color:var(--muted);margin-top:8px">Automatikus: a telefon vagy a gép beállítását követi (nappal világos, este sötét, ha így van beállítva). A választás csak ezen a készüléken érvényes.</div></div>';
+  h += '<div class="szakasz"><h2>Emlékeztetők a naptárban</h2></div>';
   if (n.be) {
     h += '<div class="kartya infok">Minden lejárat bekerül a <b>' + esc(n.nev || 'Flotta lejáratok') + '</b> nevű Google Naptárba, a beállított napokkal előtte és a lejárat napján is. Így a telefonod akkor is szól, ha az oldalt nem nyitod meg.' +
       '<br><br><b>Hogyan kapod meg?</b><br>1. A Sheet tulajdonosa megosztja veled a naptárat (Google Naptár → a naptár beállításai → Megosztás adott személyekkel).<br>2. Elfogadod a meghívót, és a naptár beállításainál az <b>Eseményértesítések</b> résznél beállítod: <b>0 perccel előtte</b>.' +
@@ -1247,18 +1384,18 @@ function fabLap() {
   var jid = u.nev === 'jarmu' ? u.id : '';
   var nincsJ = !jarmuvek().length;
   function m(act, ik, szin, cim, tilt, extra) {
-    return '<button type="button" class="muv" data-act="' + act + '"' + (extra || '') + (tilt ? ' disabled' : '') + '><span class="ik" style="' + szin + '">' + ik + '</span>' + cim + (tilt === 'kesobb' ? '<small>hamarosan</small>' : '') + '</button>';
+    return '<button type="button" class="muv" data-act="' + act + '"' + (extra || '') + (tilt ? ' disabled' : '') + '><span class="ik ' + szin + '">' + ik + '</span>' + cim + (tilt === 'kesobb' ? '<small>hamarosan</small>' : '') + '</button>';
   }
   lapNyit(lapFej('Mit rögzítesz?') + '<div class="muvracs">' +
-    m('szerviz-uj', IK.csavar, 'background:rgba(120,160,230,.16);color:#9DBDF2', 'Szerviz', nincsJ, jid ? ' data-jarmu="' + esc(jid) + '"' : '') +
-    m('hiba-uj', IK.harom, 'background:rgba(242,179,61,.16);color:#F5C25E', 'Hiba', nincsJ, jid ? ' data-jarmu="' + esc(jid) + '"' : '') +
-    m('okm-uj', IK.dok, 'background:rgba(69,194,181,.16);color:#6FD6CB', 'Lejárat / okmány', false, elo ? ' data-elo="' + esc(elo) + '"' : '') +
-    m('km', IK.ora, 'background:rgba(79,191,133,.16);color:#6FD49F', 'Km-állás', nincsJ, jid ? ' data-id="' + esc(jid) + '"' : '') +
-    m('jarmu-uj', IK.busz, 'background:rgba(120,160,230,.10);color:#9DBDF2', 'Új jármű') +
-    m('sofor-uj', IK.ember, 'background:rgba(190,160,230,.16);color:#C9B3F0', 'Új sofőr') +
-    m('tank-uj', IK.kut, 'background:rgba(69,194,181,.10);color:#6FD6CB', 'Tankolás', nincsJ, jid ? ' data-jarmu="' + esc(jid) + '"' : '') +
-    m('kar-uj', IK.pajzs, 'background:rgba(255,122,110,.12);color:#FF9A90', 'Kár / baleset', nincsJ, jid ? ' data-jarmu="' + esc(jid) + '"' : '') +
-    m('gumi-uj', IK.gumi, 'background:rgba(200,200,210,.12);color:#C3CDD4', 'Gumi', nincsJ, jid ? ' data-jarmu="' + esc(jid) + '"' : '') +
+    m('szerviz-uj', IK.csavar, 't-bl', 'Szerviz', nincsJ, jid ? ' data-jarmu="' + esc(jid) + '"' : '') +
+    m('hiba-uj', IK.harom, 't-warn', 'Hiba', nincsJ, jid ? ' data-jarmu="' + esc(jid) + '"' : '') +
+    m('okm-uj', IK.dok, 't-cy', 'Lejárat / okmány', false, elo ? ' data-elo="' + esc(elo) + '"' : '') +
+    m('km', IK.ora, 't-ok', 'Km-állás', nincsJ, jid ? ' data-id="' + esc(jid) + '"' : '') +
+    m('jarmu-uj', IK.busz, 't-bl', 'Új jármű') +
+    m('sofor-uj', IK.ember, 't-pu', 'Új sofőr') +
+    m('tank-uj', IK.kut, 't-cy', 'Tankolás', nincsJ, jid ? ' data-jarmu="' + esc(jid) + '"' : '') +
+    m('kar-uj', IK.pajzs, 't-bad', 'Kár / baleset', nincsJ, jid ? ' data-jarmu="' + esc(jid) + '"' : '') +
+    m('gumi-uj', IK.gumi, 't-gr', 'Gumi', nincsJ, jid ? ' data-jarmu="' + esc(jid) + '"' : '') +
     '</div>');
 }
 
@@ -1740,6 +1877,7 @@ document.addEventListener('click', function (e) {
   if (act === 'frissit') return frissit(false);
   if (act === 'excel') return excelLetolt();
   if (act === 'excel-teljes') return teljesExcelLetolt(el);
+  if (act === 'tema') { temaValt(el.getAttribute('data-v')); rajzol(); return; }
   if (act === 'kilep') { if (!torlesMegerosit(el, 'Biztosan kilépsz? Koppints újra')) return; return kilep(''); }
   if (act === 'masol') {
     var v = el.dataset.v;
