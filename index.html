@@ -35,27 +35,27 @@
   --menuBg:rgba(250,251,252,.92); --shadow:inset 0 1px 0 rgba(255,255,255,.95),0 1px 2px rgba(17,20,24,.06),0 12px 26px -14px rgba(17,20,24,.24); --shadow2:0 18px 44px -12px rgba(17,20,24,.35);
   --overlay:rgba(17,20,24,.45); --toastBg:#1E2126; --toastT:#FFFFFF; --toastHBg:#B42318; --toastHT:#FFFFFF; --jelT:#FFFFFF;
   --hero:linear-gradient(125deg,#17191D 0%,#2B3037 52%,#4A515B 100%); --sbBg:#1E2126; --bar:linear-gradient(180deg,#3A3F47 0%,#1E2126 100%); --barLine:rgba(0,0,0,.25);
-  --page:radial-gradient(1100px 520px at 85% -10%,#D9DEE5 0%,rgba(217,222,229,0) 60%),linear-gradient(180deg,#F4F5F7 0%,#E5E7EB 100%);
+  --page:radial-gradient(1000px 700px at 0% 0%,#D3DBE5 0%,rgba(211,219,229,0) 70%),radial-gradient(1000px 800px at 100% 100%,#E3DDD6 0%,rgba(227,221,214,0) 70%),linear-gradient(160deg,#F6F7F9 0%,#E9ECF0 50%,#DCE0E6 100%);
   --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
 }
 html[data-tema="sotet"]{
   color-scheme:dark;
-  --bg:#0E1013; --card:#171A1E; --card2:#111317; --line:#2A2E35; --line2:#22262B; --line3:#33383F;
+  --bg:#1E2126; --card:#22262C; --card2:#1A1D22; --line:#343940; --line2:#2B2F36; --line3:#3B4048;
   --text:#ECEEF1; --muted:#9EA4AE; --dim:#8E949E; --soft:#CDD1D7;
   --acc:#A3B9CD; --accBg:#C9CFD7; --accText:#121418; --accGrad:linear-gradient(180deg,#E6EAEF 0%,#A8B0BB 100%);
   --ok:#4FBF85; --okT:#6FD49F; --okS:rgba(79,191,133,.14); --okB:rgba(79,191,133,.35);
   --warn:#F2B33D; --warnT:#F5C25E; --warnS:rgba(242,179,61,.13); --warnB:rgba(242,179,61,.4);
   --bad:#FF7A6E; --badT:#FF9A90; --badS:rgba(255,122,110,.13); --badB:rgba(255,122,110,.45);
   --infoT:#A3B9CD; --infoS:rgba(163,185,205,.14); --mutedT:#B4BAC3; --mutedS:rgba(160,166,176,.14); --none:#4E535B;
-  --metal:linear-gradient(145deg,#30353C 0%,#22262B 55%,#1A1D21 100%); --tileB:#33383F;
+  --metal:linear-gradient(145deg,#3A3F47 0%,#2B2F36 55%,#22252B 100%); --tileB:#40454D;
   --tileSh:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.4),0 6px 14px -8px rgba(0,0,0,.8);
   --tCyT:#8CC2BB; --tBlT:#A3B9CD; --tPuT:#B5AAD8; --tGrT:#CDD1D7;
   --tOkT:#8CC6A7; --tWarnT:#D8B46E; --tBadT:#E39A92;
   --inset:inset 0 2px 4px rgba(0,0,0,.5),inset 0 -1px 0 rgba(255,255,255,.04);
-  --menuBg:rgba(20,22,26,.94); --shadow:inset 0 1px 0 rgba(255,255,255,.05),0 1px 2px rgba(0,0,0,.5),0 14px 30px -14px rgba(0,0,0,.75); --shadow2:0 18px 44px -10px rgba(0,0,0,.7);
+  --menuBg:rgba(30,33,38,.94); --shadow:inset 0 1px 0 rgba(255,255,255,.05),0 1px 2px rgba(0,0,0,.5),0 14px 30px -14px rgba(0,0,0,.75); --shadow2:0 18px 44px -10px rgba(0,0,0,.7);
   --overlay:rgba(3,4,6,.65); --toastBg:#2A2E35; --toastT:#ECEEF1; --toastHBg:#4A2420; --toastHT:#FFD3CE; --jelT:#1A0E0C;
-  --hero:linear-gradient(125deg,#0B0C0E 0%,#1B1E23 55%,#30353D 100%); --sbBg:#0E1013; --bar:linear-gradient(180deg,#1F2227 0%,#131518 100%); --barLine:rgba(255,255,255,.07);
-  --page:radial-gradient(1100px 520px at 85% -10%,#1F242B 0%,rgba(31,36,43,0) 60%),linear-gradient(180deg,#121417 0%,#0A0B0D 100%);
+  --hero:linear-gradient(125deg,#121417 0%,#22262C 55%,#383E47 100%); --sbBg:#1A1D21; --bar:linear-gradient(180deg,#2C3037 0%,#1A1D21 100%); --barLine:rgba(255,255,255,.07);
+  --page:radial-gradient(1000px 700px at 0% 0%,rgba(128,144,166,.22) 0%,rgba(128,144,166,0) 70%),radial-gradient(1000px 800px at 100% 100%,rgba(160,148,136,.12) 0%,rgba(160,148,136,0) 70%),linear-gradient(160deg,#2A2E35 0%,#1E2126 50%,#16181C 100%);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif;font-size:15px}
@@ -338,7 +338,7 @@ nav.menu a .jelveny{top:-6px;right:10px}
 }
 
 /* ── 0.10: grafit-acél, térhatás ── */
-body{background:var(--page);background-attachment:fixed}
+html{background:var(--bg)} body{background:var(--page);background-attachment:fixed;min-height:100vh}
 .t-cy,.t-bl,.t-pu,.t-gr,.t-ok,.t-warn,.t-bad{background:var(--metal);border:1px solid var(--tileB);box-shadow:var(--tileSh)}
 .t-ok{color:var(--tOkT)} .t-warn{color:var(--tWarnT)} .t-bad{color:var(--tBadT)}
 .gomb{background:var(--accGrad);box-shadow:inset 0 1px 0 rgba(255,255,255,.24),inset 0 -2px 0 rgba(0,0,0,.28),0 10px 20px -10px rgba(17,20,24,.55)}
@@ -392,7 +392,7 @@ nav.menu a .jelveny{top:-4px;right:12px}
 (function () {
 'use strict';
 
-var VERZIO = '0.10.1';
+var VERZIO = '0.10.2';
 var API = (window.FLOTTA_API || '').trim();
 var LS = { kod: 'fk_kod', ceg: 'fk_ceg', adat: 'fk_adat', szerep: 'fk_szerep', sid: 'fk_sid', pin: 'fk_pin', busz: 'fk_busz', rkod: 'fk_rkod' };
 
@@ -427,7 +427,7 @@ function temaAlkalmaz() {
   var t = temaAktiv();
   document.documentElement.setAttribute('data-tema', t);
   var m = document.querySelector('meta[name=theme-color]');
-  if (m) m.setAttribute('content', t === 'sotet' ? '#0E1013' : '#ECEEF1');
+  if (m) m.setAttribute('content', t === 'sotet' ? '#1A1D21' : '#ECEEF1');
 }
 function temaValt(v) { lsSet('fk_tema', v === 'sotet' ? 'sotet' : 'vilagos'); temaAlkalmaz(); }
 temaAlkalmaz();
