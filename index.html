@@ -35,7 +35,7 @@
   --menuBg:rgba(250,251,252,.92); --shadow:inset 0 1px 0 rgba(255,255,255,.95),0 1px 2px rgba(17,20,24,.06),0 12px 26px -14px rgba(17,20,24,.24); --shadow2:0 18px 44px -12px rgba(17,20,24,.35);
   --overlay:rgba(17,20,24,.45); --toastBg:#1E2126; --toastT:#FFFFFF; --toastHBg:#B42318; --toastHT:#FFFFFF; --jelT:#FFFFFF;
   --hero:linear-gradient(125deg,#17191D 0%,#2B3037 52%,#4A515B 100%); --sbBg:#1E2126; --bar:linear-gradient(180deg,#3A3F47 0%,#1E2126 100%); --barLine:rgba(0,0,0,.25);
-  --page:radial-gradient(1000px 700px at 0% 0%,#D3DBE5 0%,rgba(211,219,229,0) 70%),radial-gradient(1000px 800px at 100% 100%,#E3DDD6 0%,rgba(227,221,214,0) 70%),linear-gradient(160deg,#F6F7F9 0%,#E9ECF0 50%,#DCE0E6 100%);
+  --page:radial-gradient(1100px 760px at 0% 0%,#BFCAD8 0%,rgba(191,202,216,0) 68%),radial-gradient(1100px 860px at 100% 100%,#DDCFC0 0%,rgba(221,207,192,0) 68%),linear-gradient(155deg,#EEF1F5 0%,#E4E8ED 45%,#D2D8E0 100%);
   --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
 }
 html[data-tema="sotet"]{
@@ -381,6 +381,23 @@ nav.menu a .jelveny{top:-4px;right:12px}
 .navkor.mozog svg{animation:navpop .45s cubic-bezier(.34,1.6,.5,1)}
 @keyframes navpop{0%{transform:scale(.4) rotate(-20deg);opacity:.2}100%{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.navkor,nav.menu a .ni{transition:none}.navkor.mozog svg{animation:none}}
+
+.unnepchip{display:inline-flex;align-items:center;margin-left:8px;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:700;vertical-align:1px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#fff}
+.unnepchip.szunet{background:rgba(226,180,90,.22);border-color:rgba(226,180,90,.5);color:#F6D79A}
+.hero .al b{color:#fff;font-weight:700}
+
+.napisor{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:8px 14px;flex-wrap:wrap;margin-top:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,.12);font-size:13px;color:rgba(255,255,255,.78)}
+.napisor .nsd{display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap}
+.napisor .nsd svg{opacity:.8}
+.napisor b{color:#fff;font-weight:700}
+.napisor .nsn{margin-left:auto;white-space:nowrap}
+.napisor .unnepchip{margin-left:2px}
+.felso-sav .al b{color:#fff;font-weight:700}
+.felso-sav .al .su{color:#fff;font-weight:600}
+.felso-sav .al .su.szunet{color:#F6D79A}
+@media (max-width:380px){.felso-sav .al .sd{display:none}}
+body.sofor-mod #app{padding-bottom:24px}
+body.sofor-mod .hero .kicsi{margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -392,7 +409,7 @@ nav.menu a .jelveny{top:-4px;right:12px}
 (function () {
 'use strict';
 
-var VERZIO = '0.10.2';
+var VERZIO = '0.10.5';
 var API = (window.FLOTTA_API || '').trim();
 var LS = { kod: 'fk_kod', ceg: 'fk_ceg', adat: 'fk_adat', szerep: 'fk_szerep', sid: 'fk_sid', pin: 'fk_pin', busz: 'fk_busz', rkod: 'fk_rkod' };
 
@@ -486,6 +503,47 @@ var HONAP = ['január', 'február', 'március', 'április', 'május', 'június',
 var HON_R = ['jan', 'febr', 'márc', 'ápr', 'máj', 'jún', 'júl', 'aug', 'szept', 'okt', 'nov', 'dec'];
 var NAP = ['vasárnap', 'hétfő', 'kedd', 'szerda', 'csütörtök', 'péntek', 'szombat'];
 
+var NEVNAPOK = [
+  'Fruzsina|Ábel|Genovéva, Benjámin|Titusz, Leona|Simon|Boldizsár|Attila, Ramóna|Gyöngyvér|Marcell|Melánia|Ágota|Ernő|Veronika|Bódog|Lóránt, Loránd|Gusztáv|Antal, Antónia|Piroska|Sára, Márió|Fábián, Sebestyén|Ágnes|Vince, Artúr|Zelma, Rajmund|Timót|Pál|Vanda, Paula|Angelika|Károly, Karola|Adél|Martina, Gerda|Marcella',
+  'Ignác|Karolina, Aida|Balázs|Ráhel, Csenge|Ágota, Ingrid|Dorottya, Dóra|Tódor, Rómeó|Aranka|Abigél, Alex|Elvira|Bertold, Marietta|Lívia, Lídia|Ella, Linda|Bálint, Valentin|Kolos, Georgina|Julianna, Lilla|Donát|Bernadett|Zsuzsanna|Aladár, Álmos|Eleonóra|Gerzson|Alfréd|Mátyás|Géza|Edina|Ákos, Bátor|Elemér|',
+  'Albin|Lujza|Kornélia|Kázmér|Adorján, Adrián|Leonóra, Inez|Tamás|Zoltán|Franciska, Fanni|Ildikó|Szilárd|Gergely|Krisztián, Ajtony|Matild|Kristóf|Henrietta|Gertrúd, Patrik|Sándor, Ede|József, Bánk|Klaudia|Benedek|Beáta, Izolda|Emőke|Gábor, Karina|Irén, Írisz|Emánuel|Hajnalka|Gedeon, Johanna|Auguszta|Zalán|Árpád',
+  'Hugó|Áron|Buda, Richárd|Izidor|Vince|Vilmos, Bíborka|Herman|Dénes|Erhard|Zsolt|Leó, Szaniszló|Gyula|Ida|Tibor|Anasztázia, Tas|Csongor|Rudolf|Andrea, Ilma|Emma|Tivadar|Konrád|Csilla, Noémi|Béla|György|Márk|Ervin|Zita|Valéria|Péter|Katalin, Kitti',
+  'Fülöp, Jakab|Zsigmond|Tímea, Irma|Mónika, Flórián|Györgyi|Ivett, Frida|Gizella|Mihály|Gergely|Ármin, Pálma|Ferenc|Pongrác|Szervác, Imola|Bonifác|Zsófia, Szonja|Mózes, Botond|Paszkál|Erik, Alexandra|Ivó, Milán|Bernát, Felícia|Konstantin|Júlia, Rita|Dezső|Eszter, Eliza|Orbán|Fülöp, Evelin|Hella|Emil, Csanád|Magdolna|Janka, Zsanett|Angéla, Petronella',
+  'Tünde|Kármen, Anita|Klotild|Bulcsú|Fatime|Norbert, Cintia|Róbert|Medárd|Félix|Margit, Gréta|Barnabás|Villő|Antal, Anett|Vazul|Jolán, Vid|Jusztin|Laura, Alida|Arnold, Levente|Gyárfás|Rafael|Alajos, Leila|Paulina|Zoltán|Iván|Vilmos|János, Pál|László|Levente, Irén|Péter, Pál|Pál',
+  'Tihamér, Annamária|Ottó|Kornél, Soma|Ulrik|Emese, Sarolta|Csaba|Apollónia|Ellák|Lukrécia|Amália|Nóra, Lili|Izabella, Dalma|Jenő|Örs, Stella|Henrik, Roland|Valter|Endre, Elek|Frigyes|Emília|Illés|Dániel, Daniella|Magdolna|Lenke|Kinga, Kincső|Kristóf, Jakab|Anna, Anikó|Olga, Liliána|Szabolcs|Márta, Flóra|Judit, Xénia|Oszkár',
+  'Boglárka|Lehel|Hermina|Domonkos, Dominika|Krisztina|Berta, Bettina|Ibolya|László|Emőd|Lőrinc|Zsuzsanna, Tiborc|Klára|Ipoly|Marcell|Mária|Ábrahám|Jácint|Ilona|Huba|István|Sámuel, Hajna|Menyhért, Mirjam|Bence|Bertalan|Lajos, Patrícia|Izsó|Gáspár|Ágoston|Beatrix, Erna|Rózsa|Erika, Bella',
+  'Egyed, Egon|Rebeka, Dorina|Hilda|Rozália|Viktor, Lőrinc|Zakariás|Regina|Mária, Adrienn|Ádám|Nikolett, Hunor|Teodóra|Mária|Kornél|Szeréna, Roxána|Enikő, Melitta|Edit|Zsófia|Diána|Vilhelmina|Friderika|Máté, Mirella|Móric|Tekla|Gellért, Mercédesz|Eufrozina, Kende|Jusztina|Adalbert|Vencel|Mihály|Jeromos',
+  'Malvin|Petra|Helga|Ferenc|Aurél|Brúnó, Renáta|Amália|Koppány|Dénes|Gedeon|Brigitta|Miksa|Kálmán, Ede|Helén|Teréz|Gál|Hedvig|Lukács|Nándor|Vendel|Orsolya|Előd|Gyöngyi|Salamon|Blanka, Bianka|Dömötör|Szabina|Simon, Szimonetta|Nárcisz|Alfonz|Farkas',
+  'Marianna|Achilles|Győző|Károly|Imre|Lénárd|Rezső|Zsombor|Tivadar|Réka|Márton|Jónás, Renátó|Szilvia|Aliz|Albert, Lipót|Ödön|Hortenzia, Gergő|Jenő|Erzsébet|Jolán|Olivér|Cecília|Kelemen, Klementina|Emma|Katalin|Virág|Virgil|Stefánia|Taksony|András, Andor',
+  'Elza|Melinda, Vivien|Ferenc, Olívia|Borbála, Barbara|Vilma|Miklós|Ambrus|Mária|Natália|Judit|Árpád|Gabriella|Luca, Otília|Szilárda|Valér|Etelka, Aletta|Lázár, Olimpia|Auguszta|Viola|Teofil|Tamás|Zénó|Viktória|Ádám, Éva|Eugénia|István|János|Kamilla|Tamás, Tamara|Dávid|Szilveszter'
+];
+function nevnap(d) { return (NEVNAPOK[d.getMonth()].split('|')[d.getDate() - 1]) || ''; }
+// húsvétvasárnap (Gergely-naptár, Meeus/Jones/Butcher)
+function husvet(y) {
+  var a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+  var h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+  var ho = Math.floor((h + l - 7 * m + 114) / 31), nap = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(y, ho - 1, nap);
+}
+// ünnepnapok és jeles napok: { nev, szunet (munkaszüneti nap) }
+function unnep(d) {
+  var y = d.getFullYear(), k = (d.getMonth() + 1) * 100 + d.getDate();
+  var fix = { 101: ['Újév', 1], 214: ['Valentin-nap'], 308: ['Nőnap'], 315: ['Nemzeti ünnep', 1], 501: ['A munka ünnepe', 1], 820: ['Államalapítás ünnepe', 1],
+    1023: ['Nemzeti ünnep', 1], 1101: ['Mindenszentek', 1], 1102: ['Halottak napja'], 1206: ['Mikulás'], 1224: ['Szenteste', 1], 1225: ['Karácsony', 1], 1226: ['Karácsony másnapja', 1], 1231: ['Szilveszter'] };
+  if (fix[k]) return { nev: fix[k][0], szunet: !!fix[k][1] };
+  var h = husvet(y), diff = Math.round((new Date(y, d.getMonth(), d.getDate()) - h) / 864e5);
+  var mozgo = { '-2': ['Nagypéntek', 1], '0': ['Húsvét', 1], '1': ['Húsvéthétfő', 1], '49': ['Pünkösd', 1], '50': ['Pünkösdhétfő', 1] };
+  if (mozgo[diff]) return { nev: mozgo[diff][0], szunet: !!mozgo[diff][1] };
+  if (d.getMonth() === 4 && d.getDay() === 0 && d.getDate() <= 7) return { nev: 'Anyák napja', szunet: false };
+  return null;
+}
+// a dátumsor: dátum, névnap, ünnep
+function napiSor(d) {
+  var nn = nevnap(d), u = unnep(d);
+  return '<div class="napisor"><span class="nsd">' + IK.naptar.replace(/22/g, '16') + '<span><b>' + d.getFullYear() + '. ' + HONAP[d.getMonth()] + ' ' + d.getDate() + '.</b>, ' + NAP[d.getDay()] + '</span>' +
+    (u ? '<span class="unnepchip' + (u.szunet ? ' szunet' : '') + '">' + esc(u.nev) + (u.szunet ? ' · munkaszüneti nap' : '') + '</span>' : '') + '</span>' +
+    (nn ? '<span class="nsn">Névnap: <b>' + esc(nn) + '</b></span>' : '') + '</div>';
+}
 function ma0() { var n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
 function isoDate(s) {
   var m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -836,10 +894,11 @@ function rajzol(belepUzenet) {
   }
   var off = S.offline ? '<div class="offline">' + IK.felho + 'Nincs kapcsolat – a legutóbb letöltött adatokat látod.</div>' : '';
   function tesz(html) { return html.indexOf('<!--OFF-->') >= 0 ? html.replace('<!--OFF-->', off) : off + html; }
-  document.body.classList.toggle('van-felso', !!(belepve() && !sofor_e()));
+  document.body.classList.toggle('van-felso', !!belepve());
+  document.body.classList.toggle('sofor-mod', !!(belepve() && sofor_e()));
   if (!belepve()) { menuHely.innerHTML = ''; app.innerHTML = nezetBelepes(belepUzenet); return; }
   if (sofor_e()) {
-    menuHely.innerHTML = '';
+    menuHely.innerHTML = soforSav();
     app.innerHTML = tesz(S.A && S.A.szerep === 'sofor' ? nezetSoforFo() : '<div class="ures" style="padding-top:120px">Adatok betöltése…</div>');
     return;
   }
@@ -916,6 +975,18 @@ function felsoSav(u) {
     gomb + temaGomb('tbgomb') + '</div></header>';
 }
 
+// sofőr felső sáv: köszönés, alatta dátum + névnap (+ ünnep)
+function soforSav() {
+  var A = S.A || {}, en = A.en || {}, d = ma0(), nn = nevnap(d), un = unnep(d);
+  var nev = String(en.nev || '').split(' ').slice(-1)[0] || en.nev || '';
+  var al = '<span class="sd">' + HONAP[d.getMonth()].slice(0, 3) + '. ' + d.getDate() + '., ' + NAP[d.getDay()] + '</span>' +
+    (un ? ' · <span class="su' + (un.szunet ? ' szunet' : '') + '">' + esc(un.nev) + '</span>' : '') +
+    (nn ? ' · Névnap: <b>' + esc(nn) + '</b>' : '');
+  return '<header class="felso-sav"><div class="in"><div class="cim"><h1>' + (nev ? 'Szia, ' + esc(nev) + '!' : 'Szia!') + '</h1><div class="al">' + al + '</div></div>' +
+    '<span class="allapotchip' + (S.offline ? ' off' : '') + '" role="status"><i></i><span>' + (S.offline ? 'Nincs kapcsolat' : 'Szinkronban') + '</span></span>' +
+    temaGomb('tbgomb') + '<button type="button" class="tbgomb" data-act="s-frissit" aria-label="Frissítés">' + IK.frissit + '</button></div></header>';
+}
+
 /* ───── nézetek ───── */
 function nezetBelepes(uz) {
   var mod = S.belepMod;
@@ -960,10 +1031,7 @@ function nezetSoforFo() {
   var js = jarmuvek();
   if (!jarmu(S.busz) && js.length) { S.busz = js[0].id; lsSet(LS.busz, S.busz); }
   var j = jarmu(S.busz);
-  var h = '<div class="hero"><div class="hsor"><div><div class="kicsi">' + esc(A.ceg || 'Flotta') + '</div><h1>Szia, ' + esc(String(en.nev || '').split(' ').slice(-1)[0] || en.nev) + '!</h1>' +
-    '<div class="al">' + ma.getFullYear() + '. ' + HONAP[ma.getMonth()] + ' ' + ma.getDate() + '., ' + NAP[ma.getDay()] + '</div></div>' +
-    '<div class="hgombok">' + temaGomb('hgomb') +
-    '<button type="button" class="hgomb" data-act="s-frissit" aria-label="Frissítés">' + IK.frissit + '</button></div></div>';
+  var h = '<div class="hero"><div class="kicsi">' + esc(A.ceg || 'Flotta') + '</div>';
   if (!js.length) return h + '<!--OFF--></div><div class="kartya ures" style="margin-top:16px">Még nincs busz a rendszerben. Szólj az irodának.</div>' + soforLab();
   h += '<div class="mezo"><label for="s-busz">Melyik busszal vagy?</label><select id="s-busz" data-change="s-busz" style="height:56px;font-size:18px;font-weight:600">' +
     js.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === S.busz ? ' selected' : '') + '>' + esc(x.rendszam + (x.tipus ? ' · ' + x.tipus : '')) + '</option>'; }).join('') + '</select>' + alvazHtml(j.alvaz) + '</div><!--OFF--></div>';
@@ -1049,8 +1117,8 @@ function nezetAttekintes() {
   var mondat = bad.length ? bad.length + ' tétel lejárt' + (warn.length ? ', ' + warn.length + ' hamarosan esedékes.' : '.') :
     warn.length ? warn.length + ' tétel hamarosan esedékes, lejárt nincs.' : js.length ? 'Nincs lejárt vagy közeli határidő.' : 'Kezdjük a járművek felvételével.';
   var h = '<div class="hero"><div class="hsor"><div><div class="kicsi">Napi összefoglaló</div><h1>' + koszones() + '!</h1>' +
-    '<div class="al">' + esc(mondat) + '<br>' + datum + '</div></div>' +
-    '<div class="hgombok"><a class="hgomb" href="#/emlek" aria-label="Emlékeztetők">' + IK.csengo + (bad.length ? '<span class="jelveny">' + bad.length + '</span>' : '') + '</a></div></div>';
+    '<div class="al">' + esc(mondat) + '</div></div>' +
+    '<div class="hgombok"><a class="hgomb" href="#/emlek" aria-label="Emlékeztetők">' + IK.csengo + (bad.length ? '<span class="jelveny">' + bad.length + '</span>' : '') + '</a></div></div>' + napiSor(ma);
   if (bad.length) h += '<a class="sav bad" href="#/emlek"><span class="ik">' + IK.harom + '</span><span style="flex-grow:1"><div class="c">' + bad.length + ' lejárt tétel</div><div class="s">' + (warn.length ? 'és ' + warn.length + ' hamarosan esedékes' : 'minél előbb intézni kell') + '</div></span>' + IK.jobbra + '</a>';
   else if (warn.length) h += '<a class="sav warn" href="#/emlek"><span class="ik">' + IK.csengo + '</span><span style="flex-grow:1"><div class="c">' + warn.length + ' hamarosan esedékes</div><div class="s">nincs lejárt tétel</div></span>' + IK.jobbra + '</a>';
   else h += '<div class="sav ok"><span class="ik">' + IK.pipa + '</span><span style="flex-grow:1"><div class="c">Minden rendben</div><div class="s">' + (tl.length ? 'nincs lejárt vagy közeli határidő' : 'még nincs rögzített lejárat') + '</div></span></div>';
