@@ -392,6 +392,9 @@ nav.menu a .jelveny{top:-4px;right:12px}
 .napisor b{color:#fff;font-weight:700}
 .napisor .nsn{margin-left:auto;white-space:nowrap}
 .napisor .unnepchip{margin-left:2px}
+/* ha a kiemelt menükör a jobb szélen áll (Több), a + gomb feljebb húzódik, hogy ne takarja */
+@media (max-width:839px){.fab.fel{bottom:calc(118px + var(--sab))}}
+@media (max-width:440px){.napisor .ev{display:none}}
 .felso-sav .al b{color:#fff;font-weight:700}
 .felso-sav .al .su{color:#fff;font-weight:600}
 .felso-sav .al .su.szunet{color:#F6D79A}
@@ -409,7 +412,7 @@ body.sofor-mod .hero .kicsi{margin-bottom:10px}
 (function () {
 'use strict';
 
-var VERZIO = '0.10.5';
+var VERZIO = '0.10.8';
 var API = (window.FLOTTA_API || '').trim();
 var LS = { kod: 'fk_kod', ceg: 'fk_ceg', adat: 'fk_adat', szerep: 'fk_szerep', sid: 'fk_sid', pin: 'fk_pin', busz: 'fk_busz', rkod: 'fk_rkod' };
 
@@ -540,7 +543,7 @@ function unnep(d) {
 // a dátumsor: dátum, névnap, ünnep
 function napiSor(d) {
   var nn = nevnap(d), u = unnep(d);
-  return '<div class="napisor"><span class="nsd">' + IK.naptar.replace(/22/g, '16') + '<span><b>' + d.getFullYear() + '. ' + HONAP[d.getMonth()] + ' ' + d.getDate() + '.</b>, ' + NAP[d.getDay()] + '</span>' +
+  return '<div class="napisor"><span class="nsd">' + IK.naptar.replace(/22/g, '16') + '<span><b><span class="ev">' + d.getFullYear() + '. </span>' + HONAP[d.getMonth()] + ' ' + d.getDate() + '.</b>, ' + NAP[d.getDay()] + '</span>' +
     (u ? '<span class="unnepchip' + (u.szunet ? ' szunet' : '') + '">' + esc(u.nev) + (u.szunet ? ' · munkaszüneti nap' : '') + '</span>' : '') + '</span>' +
     (nn ? '<span class="nsn">Névnap: <b>' + esc(nn) + '</b></span>' : '') + '</div>';
 }
@@ -929,7 +932,7 @@ function menuHtml(akt) {
   var sorrend = ['attekintes', 'jarmuvek', 'emlek', 'soforok', 'tobb'], ikonok = [IK.attek, IK.busz, IK.csengo, IK.ember, IK.menu];
   var idx = Math.max(0, sorrend.indexOf(cs));
   var elozo = S.navIdx === undefined ? idx : S.navIdx;
-  return (utvonal().nev === 'koltseg' ? '' : '<button type="button" class="fab" data-act="fab" aria-label="Új bejegyzés">' + IK.plusz + '</button>') +
+  return (utvonal().nev === 'koltseg' ? '' : '<button type="button" class="fab' + (idx === sorrend.length - 1 ? ' fel' : '') + '" data-act="fab" aria-label="Új bejegyzés">' + IK.plusz + '</button>') +
     '<nav class="menu" aria-label="Fő menü"><div class="in">' +
     a('attekintes', '#/', IK.attek, 'Áttekintés') +
     a('jarmuvek', '#/jarmuvek', IK.busz, 'Járművek') +
@@ -1114,10 +1117,8 @@ function nezetAttekintes() {
 
   var all = js.length - forg - szerv;
   var datum = ma.getFullYear() + '. ' + HONAP[ma.getMonth()] + ' ' + ma.getDate() + '., ' + NAP[ma.getDay()];
-  var mondat = bad.length ? bad.length + ' tétel lejárt' + (warn.length ? ', ' + warn.length + ' hamarosan esedékes.' : '.') :
-    warn.length ? warn.length + ' tétel hamarosan esedékes, lejárt nincs.' : js.length ? 'Nincs lejárt vagy közeli határidő.' : 'Kezdjük a járművek felvételével.';
-  var h = '<div class="hero"><div class="hsor"><div><div class="kicsi">Napi összefoglaló</div><h1>' + koszones() + '!</h1>' +
-    '<div class="al">' + esc(mondat) + '</div></div>' +
+  var h = '<div class="hero"><div class="hsor"><div><h1>' + koszones() + '!</h1>' +
+    '</div>' +
     '<div class="hgombok"><a class="hgomb" href="#/emlek" aria-label="Emlékeztetők">' + IK.csengo + (bad.length ? '<span class="jelveny">' + bad.length + '</span>' : '') + '</a></div></div>' + napiSor(ma);
   if (bad.length) h += '<a class="sav bad" href="#/emlek"><span class="ik">' + IK.harom + '</span><span style="flex-grow:1"><div class="c">' + bad.length + ' lejárt tétel</div><div class="s">' + (warn.length ? 'és ' + warn.length + ' hamarosan esedékes' : 'minél előbb intézni kell') + '</div></span>' + IK.jobbra + '</a>';
   else if (warn.length) h += '<a class="sav warn" href="#/emlek"><span class="ik">' + IK.csengo + '</span><span style="flex-grow:1"><div class="c">' + warn.length + ' hamarosan esedékes</div><div class="s">nincs lejárt tétel</div></span>' + IK.jobbra + '</a>';
